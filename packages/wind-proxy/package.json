@@ -1,0 +1,37 @@
+{
+  "name": "wind-proxy",
+  "version": "1.0.0",
+  "description": "一个简易的 js 代理工具",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fengwuxp/wind-typescript"
+  },
+  "bugs": {
+    "url": "https://github.com/fengwuxp/wind-typescript/issues"
+  },
+  "homepage": "https://github.com/fengwuxp/wind-typescript#readme",
+  "main": "lib/index.js",
+  "module": "es/index.js",
+  "typings": "types/index.d.ts",
+  "files": [
+    "lib",
+    "es",
+    "types"
+  ],
+  "author": "wuxp",
+  "license": "ISC",
+  "scripts": {
+    "install:dependencies": "yarn install",
+    "test": "jest --config ./jest.config.js --verbose=false",
+    "build:ts": "rm -rf ./types && tsc -p ./tsconfig.lib.json --emitDeclarationOnly",
+    "build:lib": "npm run test && rm -rf ./dist && rm -rf ./es  && npm run build:ts && rollup -c && rm -rf ./types-temp",
+    "npm:publish": "npm publish",
+    "deploy:lib": "npm run build:lib && npm run npm:publish"
+  },
+  "keywords": [],
+  "devDependencies": {
+  }
+}

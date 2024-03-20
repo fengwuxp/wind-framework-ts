@@ -1,0 +1,32 @@
+{
+  "name": "wind-common-utils",
+  "version": "1.0.0",
+  "description": "common utils",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fengwuxp/wind-typescript"
+  },
+  "bugs": {
+    "url": "https://github.com/fengwuxp/wind-typescript/issues"
+  },
+  "homepage": "https://github.com/fengwuxp/wind-typescript#readme",
+  "main": "index.ts",
+  "author": "wuxp",
+  "license": "ISC",
+  "scripts": {
+    "install:dependencies": "yarn install",
+    "test": "jest --config ./jest.config.js --verbose=false",
+    "npm:publish": "npm publish",
+    "build:ts": "npm run test && rm -rf ./lib && tsc",
+    "deploy:lib": "npm run test &&  npm run build:ts && npm publish"
+  },
+  "devDependencies": {
+  },
+  "dependencies": {
+    "xregexp": "^4.2.4",
+    "xregexp-quotemeta": "^1.0.4"
+  }
+}
