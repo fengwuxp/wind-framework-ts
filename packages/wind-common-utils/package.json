@@ -7,12 +7,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/fengwuxp/wind-typescript"
+    "url": "https://github.com/fengwuxp/wind-framework-ts"
   },
   "bugs": {
-    "url": "https://github.com/fengwuxp/wind-typescript/issues"
+    "url": "https://github.com/fengwuxp/wind-framework-ts/issues"
   },
-  "homepage": "https://github.com/fengwuxp/wind-typescript#readme",
+  "homepage": "https://github.com/fengwuxp/wind-framework-ts#readme",
   "main": "index.ts",
   "author": "wuxp",
   "license": "ISC",

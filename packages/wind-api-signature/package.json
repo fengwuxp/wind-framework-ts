@@ -1,7 +1,7 @@
 {
-  "name": "wind-proxy",
+  "name": "wind-api-signature",
   "version": "1.0.0",
-  "description": "一个简易的 js 代理工具",
+  "description": "wind api signature",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
@@ -32,6 +32,9 @@
     "deploy:lib": "npm run build:lib && npm run npm:publish"
   },
   "keywords": [],
-  "devDependencies": {
+  "devDependencies": {},
+  "dependencies": {
+    "jsrsasign": "^11.1.0",
+    "md5": "^2.3.0"
   }
 }
