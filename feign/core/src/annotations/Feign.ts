@@ -1,6 +1,6 @@
-import {FeignHttpConfiguration} from "../configuration/FeignHttpConfiguration";
 import {FeignProxyClient} from "../support/FeignProxyClient";
 import {FeignClientType, generateFeignClientAnnotation} from "./FeignClientAnnotationFactory";
+import {FeignClientConfiguration} from "../configuration/FeignClientConfiguration";
 
 
 export const FEIGN_HTTP: FeignClientType = "http";
@@ -10,4 +10,4 @@ export const FEIGN_HTTP: FeignClientType = "http";
  * @param options
  * @constructor
  */
-export const Feign = generateFeignClientAnnotation<FeignHttpConfiguration, FeignProxyClient<FeignHttpConfiguration>>(FEIGN_HTTP);
+export const Feign = generateFeignClientAnnotation<FeignClientConfiguration, FeignProxyClient<FeignClientConfiguration>>(FEIGN_HTTP);

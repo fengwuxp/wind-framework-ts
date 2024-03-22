@@ -35,6 +35,7 @@
   "devDependencies": {},
   "dependencies": {
     "jsrsasign": "^11.1.0",
-    "md5": "^2.3.0"
+    "md5": "^2.3.0",
+    "wind-common-utils": "1.0.0"
   }
 }

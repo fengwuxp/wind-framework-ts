@@ -1,19 +1,15 @@
 import {
-    AuthenticationType,
     DeleteMapping,
     Feign,
     FeignRequestOptions,
     FeignRetry,
-    FileUpload,
-    HttpMediaType,
-    HttpMethod,
     PostMapping,
     PutMapping,
     RequestMapping,
-    Signature
 } from "../src";
 import {GetMapping} from "../src/annotations/mapping/GetMapping";
 import {ValidateSchema} from '../src/annotations/validator/VailidatorSchema';
+import {HttpMediaType, HttpMethod} from "wind-http";
 
 
 type FindMemberRequest = {
@@ -42,11 +38,9 @@ export default class TestFeignClient {
         date: Date
     }, options?: FeignRequestOptions) => Promise<any>;
 
-    @Signature({fields: []})
     @RequestMapping({
         value: "/testQuery/{idV:100}",
         method: HttpMethod.POST,
-        authenticationType: AuthenticationType.TRY,
         headers: {
             test: 1,
             test2: [2, 3],
@@ -62,7 +56,6 @@ export default class TestFeignClient {
     })
     testQuery: (evt: any, options?: FeignRequestOptions) => Promise<any>;
 
-    @Signature({fields: ["userName"]})
     @PostMapping({
         value: "find_member/{name}",
         headers: {myHeader: "tk_{memberId}"},
@@ -83,7 +76,7 @@ export default class TestFeignClient {
         request: FindMemberRequest,
         options?: FeignRequestOptions) => Promise<any>;
 
-    @Signature({fields: ["memberId"]})
+
     @DeleteMapping({value: "delete_member/{memberId}", produces: [HttpMediaType.APPLICATION_JSON_UTF8]})
     deleteMember: (
         request: {
@@ -91,11 +84,7 @@ export default class TestFeignClient {
         },
         options?: FeignRequestOptions) => Promise<number>;
 
-    @FileUpload<{
-        goods: Array<string>
-    }>({
-        fields: ["goods"]
-    })
+
     @PostMapping({
         value: "evaluate/order",
         produces: [HttpMediaType.APPLICATION_JSON_UTF8]

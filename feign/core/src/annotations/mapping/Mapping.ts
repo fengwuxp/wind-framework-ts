@@ -1,7 +1,6 @@
-import {HttpMethod} from "../../constant/http/HttpMethod";
+import {HttpMethod} from "wind-http";
 import {FeignClient} from "../../FeignClient";
 import {registerAnnotationMetadata} from "../../support/AnnotationMetadataRegister";
-import {AuthenticationType} from "../../constant/AuthenticationType";
 
 
 export type MappingMethod = HttpMethod | string;
@@ -15,10 +14,6 @@ export type MappingHeaders =
     Record<string, string>
     | Record<string, boolean | number | string | Date | MappingHeaderType>;
 
-/**
- *请求认证类型
- */
-export type RequestAuthenticationType = AuthenticationType | string | number;
 
 export interface BaseRequestMappingOptions {
     /**
@@ -63,14 +58,6 @@ export interface BaseRequestMappingOptions {
      */
     produces?: string[];
 
-
-    /**
-     * 接口认证类型
-     *  {@see AuthenticationClientHttpRequestInterceptor#intercept}
-     *  可以通过自定义拦截器处理该字段
-     */
-    authenticationType?: RequestAuthenticationType;
-
 }
 
 
@@ -108,7 +95,7 @@ export function generateMapping<T extends BaseRequestMappingOptions>(method?: Ma
 
             //通过注解生成feign的代理配置
             const requestMapping: RequestMappingOptions = {
-                authenticationType: AuthenticationType.DEFAULT,
+
                 method,
                 ...(options as any)
             };

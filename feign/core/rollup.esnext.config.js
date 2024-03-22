@@ -29,11 +29,12 @@ const getConfig = (isProd) => {
             "xregexp-quotemeta",
             "querystring",
             "lodash/memoize",
-            "fengwuxp-common-proxy",
-            "fengwuxp-common-utils",
-            "fengwuxp-common-utils/lib/date/DateFormatUtils",
-            "fengwuxp-common-utils/lib/match/SimplePathMatcher",
-            "fengwuxp-common-utils/lib/string/StringUtils"
+            "wind-proxy",
+            "wind-common-utils",
+            "wind-http",
+            "wind-common-utils/lib/date/DateFormatUtils",
+            "wind-common-utils/lib/match/SimplePathMatcher",
+            "wind-common-utils/lib/string/StringUtils"
         ],
         output: [
             {

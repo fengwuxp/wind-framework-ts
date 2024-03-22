@@ -1,8 +1,9 @@
 import {RequestURLResolver} from "./RequestURLResolver";
-
 import {FeignClientMemberOptions, FeignProxyClient} from "../../support/FeignProxyClient";
 import StringUtils from 'wind-common-utils/lib/string/StringUtils';
-import {LB_SCHEMA} from "../../constant/FeignConstVar";
+import {LB_SCHEMA} from "wind-http";
+import {FeignClientConfiguration} from "../../configuration/FeignClientConfiguration";
+
 
 /**
  * restful request url resolver
@@ -11,7 +12,7 @@ import {LB_SCHEMA} from "../../constant/FeignConstVar";
  */
 export const restfulRequestURLResolver: RequestURLResolver = (apiService: FeignProxyClient, methodName: string): string => {
 
-    const feignOptions = apiService.feignOptions();
+    const feignOptions = apiService.options();
 
     //生成 例如 @member/member/queryMember 或 @default/member/{memberId}
     return `${getApiUriByApiService(apiService, feignOptions)}${getApiUriByApiServiceMethod(apiService, methodName)}`;
@@ -22,14 +23,14 @@ export const restfulRequestURLResolver: RequestURLResolver = (apiService: FeignP
  * @param apiService
  * @param feignOptions
  */
-export const getApiUriByApiService = (apiService: FeignProxyClient, feignOptions: FeignClientMemberOptions) => {
+export const getApiUriByApiService = (apiService: FeignProxyClient, feignOptions: FeignClientMemberOptions<FeignClientConfiguration>) => {
 
-    const {apiModule, url} = feignOptions;
+    const {apiServiceName, url} = feignOptions;
     if (StringUtils.hasText(url)) {
         return `${url}`;
     }
     const serviceName = apiService.serviceName();
-    return `${LB_SCHEMA}${apiModule}${serviceName.startsWith("/") ? serviceName : "/" + serviceName}`;
+    return `${LB_SCHEMA}${apiServiceName}${serviceName.startsWith("/") ? serviceName : "/" + serviceName}`;
 };
 
 

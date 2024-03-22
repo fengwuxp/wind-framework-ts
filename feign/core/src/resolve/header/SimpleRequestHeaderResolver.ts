@@ -1,8 +1,6 @@
 import {RequestHeaderResolver} from "./RequestHeaderResolver";
 import {FeignProxyClient} from "../../support/FeignProxyClient";
-import {contentTypeName} from "../../constant/FeignConstVar";
-import {UriVariable} from "../../template/RestOperations";
-import {replacePathVariableValue} from "../../helper/ReplaceUriVariableHelper";
+import {CONTENT_TYPE_HEAD_NAME, replacePathVariableValue, UriVariable} from "wind-http";
 
 
 /**
@@ -40,9 +38,8 @@ export const simpleRequestHeaderResolver: RequestHeaderResolver = (apiService: F
     }
     const produces = requestMapping.produces;
     if (produces != null) {
-        newHeaders[contentTypeName] = produces[0];
+        newHeaders[CONTENT_TYPE_HEAD_NAME] = produces[0];
     }
-
     return newHeaders;
 };
 

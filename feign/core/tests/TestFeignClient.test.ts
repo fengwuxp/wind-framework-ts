@@ -2,9 +2,10 @@ import * as log4js from "log4js";
 import TestFeignClient from "./TestFeignClient";
 import FeignConfigurationRegistry from "../src/configuration/FeignConfigurationRegistry";
 import ExampleFeignClient from "./ExampleFeignClient";
-import MockFeignConfiguration from "./MockFeignConfiguration";
-import {ClientRequestDataValidatorHolder, defaultApiModuleName} from "../src";
+import {ClientRequestDataValidatorHolder} from "../src";
 import {FEIGN_HTTP} from "../src/annotations/Feign";
+import MockFeignClientConfigurer from "./mock/MockFeignClientConfigurer";
+import {DEFAULT_SERVICE_NAME} from "wind-http";
 
 const logger = log4js.getLogger();
 logger.level = 'debug';
@@ -12,7 +13,7 @@ logger.level = 'debug';
 
 describe("test feign client", () => {
 
-    const mockFeignConfiguration = new MockFeignConfiguration();
+    const mockFeignConfiguration = new MockFeignClientConfigurer().build();
 
     const testFeignClient = new TestFeignClient();
     const exampleFeignClient = new ExampleFeignClient();
@@ -35,7 +36,7 @@ describe("test feign client", () => {
     test("test feign client", async () => {
         sleep(200).then(() => {
             logger.info("异步设置设置配置")
-            FeignConfigurationRegistry.setFeignConfiguration(FEIGN_HTTP, defaultApiModuleName, mockFeignConfiguration);
+            FeignConfigurationRegistry.setFeignConfiguration(FEIGN_HTTP, DEFAULT_SERVICE_NAME, mockFeignConfiguration);
         })
         const result = await exampleFeignClient.findMember({
             name: "张三",
@@ -72,17 +73,23 @@ describe("test feign client", () => {
         try {
             sleep(200).then(() => {
                 logger.info("异步设置设置配置")
-                FeignConfigurationRegistry.setFeignConfiguration(FEIGN_HTTP, defaultApiModuleName, mockFeignConfiguration);
+                FeignConfigurationRegistry.setFeignConfiguration(FEIGN_HTTP, DEFAULT_SERVICE_NAME, mockFeignConfiguration);
             })
             const result = await testFeignClient.testQuery({
                 id: 1,
                 date: new Date(),
                 queryPage: "1",
                 a: "hhh"
+            }, {
+                retryOptions: {
+                    maxTimeout: 2000,
+                    retries: 5,
+                    delay: 600
+                }
             });
             expect(result).toEqual({})
         } catch (error) {
-            expect(error).toEqual(new Error("retry timeout, maxTimeout=9000, retry count = 4"))
+            expect(error).toEqual(new Error("retry timeout, maxTimeout=2000, retry count = 3"))
         }
     }, 25 * 1000);
 
@@ -114,7 +121,7 @@ describe("test feign client", () => {
     test("test network status change", async () => {
         sleep(200).then(() => {
             logger.info("异步设置设置配置")
-            FeignConfigurationRegistry.setFeignConfiguration(FEIGN_HTTP, defaultApiModuleName, mockFeignConfiguration);
+            FeignConfigurationRegistry.setFeignConfiguration(FEIGN_HTTP, DEFAULT_SERVICE_NAME, mockFeignConfiguration);
         })
         const total = 10;
         const elements = [];
@@ -133,7 +140,7 @@ describe("test feign client", () => {
     test("test auto upload file ", async () => {
         sleep(200).then(() => {
             logger.info("异步设置设置配置")
-            FeignConfigurationRegistry.setFeignConfiguration(FEIGN_HTTP, defaultApiModuleName, mockFeignConfiguration);
+            FeignConfigurationRegistry.setFeignConfiguration(FEIGN_HTTP, DEFAULT_SERVICE_NAME, mockFeignConfiguration);
         })
         try {
             const result = await testFeignClient.evaluateOrder({
@@ -155,7 +162,7 @@ describe("test feign client", () => {
     test("test deleted", async () => {
         sleep(200).then(() => {
             logger.info("异步设置设置配置")
-            FeignConfigurationRegistry.setFeignConfiguration(FEIGN_HTTP, defaultApiModuleName, mockFeignConfiguration);
+            FeignConfigurationRegistry.setFeignConfiguration(FEIGN_HTTP, DEFAULT_SERVICE_NAME, mockFeignConfiguration);
         })
         try {
             const result = await testFeignClient.deleteById({ids: [1, 2, 3, 4], a: "22", c: "33"});

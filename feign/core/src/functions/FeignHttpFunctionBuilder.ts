@@ -1,11 +1,11 @@
 import {FeignClientOptions} from "../annotations/FeignClientAnnotationFactory";
-import {FeignHttpConfiguration} from "../configuration/FeignHttpConfiguration";
 import {FeignHttpClientFunction} from "./FeignHttpClientFunction";
 import {BaseRequestMappingOptions, RequestMappingOptions} from "../annotations/mapping/Mapping";
 import {FeignProxyClient} from "../support/FeignProxyClient";
-import {HttpMethod} from "../constant/http/HttpMethod";
 import {Feign} from "../annotations/Feign";
 import {RequestMapping} from "../annotations/mapping/RequestMapping";
+import {FeignClientConfiguration} from "../configuration/FeignClientConfiguration";
+import {HttpMethod} from "wind-http";
 
 
 export interface FeignHttpFunctionBuilder {
@@ -30,13 +30,13 @@ class _InnerFeignHttpFunctionBuilder implements FeignHttpFunctionBuilder {
 
     private readonly proxyClass;
 
-    private readonly feignProxyHttpClient: FeignProxyClient<FeignHttpConfiguration>;
+    private readonly feignProxyHttpClient: FeignProxyClient<FeignClientConfiguration>;
 
     private methodIndex = 0;
 
-    constructor(proxyClass, options: FeignClientOptions<FeignHttpConfiguration>) {
+    constructor(proxyClass, options: FeignClientOptions<FeignClientConfiguration>) {
         this.proxyClass = proxyClass;
-        const FeignHttpClientConstructor: { new(...args: any[]): FeignProxyClient<FeignHttpConfiguration> } = Feign(options)(proxyClass);
+        const FeignHttpClientConstructor: { new(...args: any[]): FeignProxyClient<FeignClientConfiguration> } = Feign(options)(proxyClass);
         this.feignProxyHttpClient = new FeignHttpClientConstructor();
     }
 
@@ -109,7 +109,7 @@ class _InnerFeignHttpFunctionBuilder implements FeignHttpFunctionBuilder {
  *
  * @param options
  */
-export const feignHttpFunctionBuilder = (options: FeignClientOptions<FeignHttpConfiguration>): FeignHttpFunctionBuilder => {
+export const feignHttpFunctionBuilder = (options: FeignClientOptions<FeignClientConfiguration>): FeignHttpFunctionBuilder => {
     return new _InnerFeignHttpFunctionBuilder(class {
     }, options);
 }

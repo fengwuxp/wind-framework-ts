@@ -1,11 +1,15 @@
-import {HttpAdapter} from "../../src/adapter/HttpAdapter";
-import {HttpRequest} from "../../src/client/HttpRequest";
-import {HttpResponse} from "../../src/client/HttpResponse";
-import {ResolveHttpResponse} from "../../src/resolve/ResolveHttpResponse";
-import CommonResolveHttpResponse from "../../src/resolve/CommonResolveHttpResponse";
-import {contentTypeName, HttpMediaType, HttpMethod, matchMediaType} from "../../src";
-import {HttpStatus} from "../../src/constant/http/HttpStatus";
 import * as log4js from "log4js";
+import {
+    CONTENT_TYPE_HEAD_NAME,
+    HttpAdapter,
+    HttpMediaType,
+    HttpMethod,
+    HttpRequest,
+    HttpResponse,
+    HttpStatus,
+    matchMediaType
+} from "wind-http";
+import URL from "url-parse";
 
 const logger = log4js.getLogger();
 logger.level = 'debug';
@@ -18,12 +22,29 @@ const sleep = (times) => {
     })
 };
 
+const resolveHttpResponse = (resp: Response): HttpResponse => {
+    if (resp == null) {
+        return {
+            ok: false,
+            headers: {},
+            data: null,
+            statusCode: -1,
+            statusText: "Response is null"
+        }
+    }
+    const {headers, ok, status} = resp;
+    return {
+        data: resp['data'],
+        headers: (headers as any),
+        ok,
+        statusCode: status,
+        statusText: resp["statusText"] || null
+    }
+};
 /**
  * mock http adapter
  */
 export default class MockHttpAdapter implements HttpAdapter {
-
-    private readonly resolveHttpResponse: ResolveHttpResponse = new CommonResolveHttpResponse();
 
     private readonly mockDataSource: Record<string, MockDataSupplier> = {};
 
@@ -40,10 +61,10 @@ export default class MockHttpAdapter implements HttpAdapter {
     send = async (req: HttpRequest): Promise<HttpResponse> => {
         logger.debug("[MockHttpAdapter] send ", req);
         const {url, method, headers} = req;
-        if (matchMediaType(headers[contentTypeName] as HttpMediaType, HttpMediaType.MULTIPART_FORM_DATA)) {
+        if (matchMediaType(headers[CONTENT_TYPE_HEAD_NAME] as HttpMediaType, HttpMediaType.MULTIPART_FORM_DATA)) {
             // remove content-type
             // @see {@link https://segmentfault.com/a/1190000010205162}
-            delete headers[contentTypeName];
+            delete headers[CONTENT_TYPE_HEAD_NAME];
         }
 
         const result: MockDataSupplier = this.getMockData(method, url);
@@ -57,28 +78,26 @@ export default class MockHttpAdapter implements HttpAdapter {
                 redirected: null,
                 headers: null
             } as any;
-            return Promise.reject(this.resolveHttpResponse.resolve(response));
+            return Promise.reject(resolveHttpResponse(response));
         } else {
             if (method == HttpMethod.HEAD) {
-                return Promise.resolve(this.resolveHttpResponse.resolve({
+                return Promise.resolve(resolveHttpResponse({
                     status: HttpStatus.OK,
-                    statusText: null,
-                    data: req,
                     ok: true,
+                    data: result(req),
                     url,
                     redirected: null,
                     headers: result(req)
-                }));
+                } as any));
             }
-            return Promise.resolve(this.resolveHttpResponse.resolve({
+            return Promise.resolve(resolveHttpResponse({
                 status: HttpStatus.OK,
-                statusText: null,
-                data: result(req),
                 ok: true,
                 url,
+                data: result(req),
                 redirected: null,
                 headers: null
-            }));
+            } as any));
         }
     };
 
@@ -94,13 +113,13 @@ export default class MockHttpAdapter implements HttpAdapter {
 
 
     getMockData = (method: string, url: string): MockDataSupplier => {
-        let pathname = url.split("?")[0].replace(this.baseUrl, "");
+        let pathname = new URL(url).pathname
         if (!pathname.startsWith("/")) {
             pathname = `/${pathname}`;
         }
         const mockDataSource = this.mockDataSource;
-        return mockDataSource[`${method.toUpperCase()} ${pathname}`];
+        const key = `${method.toUpperCase()} ${pathname}`;
+        return mockDataSource[key];
     }
-
 
 }

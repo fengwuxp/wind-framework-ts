@@ -3,4 +3,4 @@ export {
     ApiSecretAccount,
     ApiRequestSingerOptions
 } from "./ApiRequestSinger";
-export {matchMediaType, genNonce, ApiSignatureRequest, HttpMediaType} from "./ApiSignatureRequest"
+export {matchMediaType, ApiSignatureRequest, HttpMediaType} from "./ApiSignatureRequest"

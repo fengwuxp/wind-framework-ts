@@ -1,5 +1,5 @@
 import {BaseRequestMappingOptions, generateMapping, Mapping} from "./Mapping";
-import {HttpMethod} from "../../constant/http/HttpMethod";
+import {HttpMethod} from "wind-http";
 
 /**
  * PostMapping

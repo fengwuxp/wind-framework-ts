@@ -1,4 +1,4 @@
-import {FeignRequestOptions} from "../FeignRequestOptions";
+import {FeignRequestOptions} from "../FeignClient";
 
 
 export type FeignHttpClientFunction<T, R> = (req: T | undefined, options?: FeignRequestOptions) => R;

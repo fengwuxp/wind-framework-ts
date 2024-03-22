@@ -1,11 +1,11 @@
 import {ApiSigner, HMAC_SHA256} from 'ApiSignatureAlgorithm';
 import {
     ApiSignatureRequest,
-    genNonce,
     getCanonicalizedQueryString,
     getSignTextForDigest,
     getSignTextForSha256WithRsa
 } from "./ApiSignatureRequest";
+import StringUtils from "wind-common-utils/lib/string/StringUtils";
 
 
 /**
@@ -109,7 +109,7 @@ export class ApiRequestSinger {
         const signRequest: ApiSignatureRequest = {
             ...request,
             method: request.method.toUpperCase() as any,
-            nonce: genNonce(),
+            nonce: StringUtils.genNonce(),
             timestamp: new Date().getTime().toString(),
         }
         const headerPrefix = options.headerPrefix;

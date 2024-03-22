@@ -1,9 +1,8 @@
 import {FeignClient} from "../../FeignClient";
 import {registerAnnotationMetadata} from "../../support/AnnotationMetadataRegister";
-import {HttpRetryOptions} from "../../client/HttpRetryOptions";
+import {HttpRetryOptions} from "wind-http";
 
-
-export const defaultOptions: HttpRetryOptions = {
+export const DEFAULT_RETRY_OPTIONS: HttpRetryOptions = {
     retries: 1,
     maxTimeout: 15000,
     delay: 100
@@ -16,7 +15,6 @@ export const defaultOptions: HttpRetryOptions = {
  */
 export const FeignRetry = <T extends FeignClient>(options: HttpRetryOptions): Function => {
 
-
     /**
      * decorator
      * @param  {T} target                        装饰的属性所属的类的原型，注意，不是实例后的类。如果装饰的是 T 的某个属性，这个 target 的值就是 T.prototype
@@ -26,11 +24,10 @@ export const FeignRetry = <T extends FeignClient>(options: HttpRetryOptions): Fu
     return function (target: T, name: string, descriptor: PropertyDescriptor): T {
         registerAnnotationMetadata(target, name, {
             retryOptions: {
-                ...defaultOptions,
+                ...DEFAULT_RETRY_OPTIONS,
                 ...options
             }
         });
         return target;
-
     }
 }

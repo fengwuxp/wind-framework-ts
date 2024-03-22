@@ -1,13 +1,12 @@
 import * as log4js from "log4js";
-import MockFeignConfiguration from "../MockFeignConfiguration";
 import {
-    defaultApiModuleName,
     FeignConfigurationRegistry,
     FeignHttpClientPromiseFunction,
     feignHttpFunctionBuilder
 } from "../../src";
 import {FEIGN_HTTP} from "../../src/annotations/Feign";
-import {appendRouteMapping, parseRequestUrl} from "../../src/context/RquestUrlMappingHolder";
+import MockFeignClientConfigurer from "../mock/MockFeignClientConfigurer";
+import {appendRouteMapping, DEFAULT_SERVICE_NAME, getRealRequestUrl} from "wind-http";
 
 const logger = log4js.getLogger();
 logger.level = 'debug';
@@ -15,11 +14,9 @@ logger.level = 'debug';
 
 describe("test functions feign client builder", () => {
 
-    const mockFeignConfiguration = new MockFeignConfiguration();
-    const httpAdapter = mockFeignConfiguration.getHttpAdapter();
-    httpAdapter.setMockData("GET /api/test/v1/user/1", (req) => ({name: "test"}));
+    const mockFeignConfiguration = new MockFeignClientConfigurer().build();
 
-    FeignConfigurationRegistry.setFeignConfiguration(FEIGN_HTTP, defaultApiModuleName, mockFeignConfiguration);
+    FeignConfigurationRegistry.setFeignConfiguration(FEIGN_HTTP, DEFAULT_SERVICE_NAME, mockFeignConfiguration);
     const functionBuilder = feignHttpFunctionBuilder({value: "/api/test/v1"});
 
     test("test function build http client", async () => {
@@ -33,8 +30,8 @@ describe("test functions feign client builder", () => {
             "test1": "http://www.test.com.cn/api",
             "test2": "https://www.test.com.cn/api",
         })
-        expect(parseRequestUrl("lb://test1/users")).toEqual("http://www.test.com.cn/api/users");
-        expect(parseRequestUrl("lb://test2/users")).toEqual("https://www.test.com.cn/api/users");
+        expect(getRealRequestUrl("lb://test1/users")).toEqual("http://www.test.com.cn/api/users");
+        expect(getRealRequestUrl("lb://test2/users")).toEqual("https://www.test.com.cn/api/users");
     })
 
 });

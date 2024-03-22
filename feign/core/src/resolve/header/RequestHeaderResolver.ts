@@ -1,5 +1,5 @@
-import {UriVariable} from "../../template/RestOperations";
 import {FeignProxyClient} from "../../support/FeignProxyClient";
+import {UriVariable} from "wind-http";
 
 
 /**

@@ -23,6 +23,7 @@ const getConfig = (isProd) => {
         // https://rollupjs.org/guide/en#external-e-external
         external: [
             "md5",
+            "wind-common-utils",
             "jsrsasign",
             "@babel/runtime-corejs3"
         ],

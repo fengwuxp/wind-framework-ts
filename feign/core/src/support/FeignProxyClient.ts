@@ -1,18 +1,16 @@
 import {FeignClient} from "../FeignClient";
 import {FeignClientMethodConfig} from "./FeignClientMethodConfig";
-import {BaseFeignClientConfiguration} from "./BaseFeignClientConfiguration";
+import {FeignClientConfiguration} from "../configuration/FeignClientConfiguration";
 
 
 export interface BaseFeignClientOptions {
 
     /**
-     * 所属的api模块
-     * 通过api模块名称可以区分不同模块的配置，比如api入口地址等
-     *
-     * api module name
-     * @see {@link ../constant/FeignConstVar.ts ==> defaultApiModuleName}
+     * api service name
+     * 可以通过 api service name 作为标识发起请求
+     * 例如：lb://{apiServiceName}/api/v1/xx
      */
-    apiModule?: string;
+    apiServiceName?: string;
 
     /**
      * 请求uri
@@ -29,7 +27,7 @@ export interface BaseFeignClientOptions {
     url?: string;
 }
 
-export interface FeignClientMemberOptions<C extends BaseFeignClientConfiguration = BaseFeignClientConfiguration> extends BaseFeignClientOptions {
+export interface FeignClientMemberOptions<C extends FeignClientConfiguration> extends BaseFeignClientOptions {
 
     /**
      * feign configuration
@@ -40,7 +38,7 @@ export interface FeignClientMemberOptions<C extends BaseFeignClientConfiguration
 /**
  * feign proxy client
  */
-export interface FeignProxyClient<C extends BaseFeignClientConfiguration = BaseFeignClientConfiguration> extends FeignClient {
+export interface FeignProxyClient<C extends FeignClientConfiguration = FeignClientConfiguration> extends FeignClient {
 
 
     /**
@@ -51,12 +49,12 @@ export interface FeignProxyClient<C extends BaseFeignClientConfiguration = BaseF
     /**
      * feign proxy options
      */
-    readonly feignOptions: () => Readonly<FeignClientMemberOptions<C>>;
+    readonly options: () => Readonly<FeignClientMemberOptions<C>>;
 
     /**
      * get feign configuration
      */
-    readonly feignConfiguration: <C>() => Promise<Readonly<C>>;
+    readonly configuration: <C>() => Promise<Readonly<C>>;
 
     /**
      * 获取获取接口方法的配置

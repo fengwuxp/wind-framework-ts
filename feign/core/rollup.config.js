@@ -33,6 +33,7 @@ const getConfig = (isProd) => {
             "lodash/memoize",
             "wind-proxy",
             "wind-common-utils",
+            "wind-http",
             "wind-common-utils/lib/date/DateFormatUtils",
             "wind-common-utils/lib/match/SimplePathMatcher",
             "wind-common-utils/lib/string/StringUtils"

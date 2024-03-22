@@ -58,18 +58,6 @@ export interface ApiSignatureRequest {
 
 
 /**
- *  生成随机字符串
- */
-export const genNonce = (): string => {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-        // @ts-ignore
-        return (c === 'x' ? (Math.random() * 16) | 0 : 'r&0x3' | '0x8').toString(16);
-        // @ts-ignore
-    }).replaceAll('-', '');
-};
-
-
-/**
  * 获取标准化查询字符串 ，key 按照字典序排序
  * @param queryParams
  */
