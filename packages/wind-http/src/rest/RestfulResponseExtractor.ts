@@ -65,10 +65,10 @@ export const optionsMethodResponseExtractor = (response: HttpResponse): Promise<
 };
 
 /**
- *
- * @param method
+ * 通过 http 请求方法获取一个 ResponseExtractor
+ * @param method http method
  */
-export const restfulResponseExtractor = (method: HttpMethod) => {
+export const restfulResponseExtractorFactory = (method: HttpMethod) => {
     switch (method) {
         case HttpMethod.GET:
             return objectResponseExtractor;
@@ -84,5 +84,7 @@ export const restfulResponseExtractor = (method: HttpMethod) => {
             return headResponseExtractor;
         case HttpMethod.PUT:
             return objectResponseExtractor;
+        default:
+            throw new Error(`unsupported http method: ${method}`);
     }
 };

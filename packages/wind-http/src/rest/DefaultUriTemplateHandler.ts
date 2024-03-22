@@ -10,7 +10,6 @@ import {replacePathVariableValue} from "../utils/UriVariableUtils";
  * @param uriVariables url params
  */
 export const defaultUriTemplateFunctionHandler: UriTemplateHandlerFunction = (uriTemplate: string, uriVariables: UriVariable) => {
-
     if (uriVariables == null) {
         return uriTemplate;
     }

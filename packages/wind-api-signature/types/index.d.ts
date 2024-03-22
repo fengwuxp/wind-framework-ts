@@ -43,10 +43,6 @@ interface ApiSignatureRequest {
      */
     requestBody?: string;
 }
-/**
- *  生成随机字符串
- */
-declare const genNonce: () => string;
 declare const matchMediaType: (contentType: HttpMediaType | string, expectMediaType: HttpMediaType | string) => boolean;
 
 interface ApiSecretAccount {
@@ -88,4 +84,4 @@ declare class ApiRequestSinger {
     sign: (request: Omit<ApiSignatureRequest, "nonce" | "timestamp">) => Record<string, string>;
 }
 
-export { ApiRequestSinger, ApiRequestSingerOptions, ApiSecretAccount, ApiSignatureRequest, HttpMediaType, genNonce, matchMediaType };
+export { ApiRequestSinger, ApiRequestSingerOptions, ApiSecretAccount, ApiSignatureRequest, HttpMediaType, matchMediaType };

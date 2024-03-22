@@ -1,13 +1,8 @@
 import {HttpMethod} from "../enums/HttpMethod";
-import {HttpRequestContextAttributes, HttpResponse, UriVariable} from "../Http";
+import {HttpRequest, HttpRequestContextAttributes, HttpResponse, UriVariable} from "../Http";
 import {ResponseExtractor} from "./ResponseExtractor";
 
-export interface RestfulHttpRequest {
-
-    /**
-     * request method
-     */
-    method: HttpMethod;
+export interface RestfulHttpRequest extends HttpRequest {
 
     /**
      * request url or request pattern
@@ -20,15 +15,6 @@ export interface RestfulHttpRequest {
      */
     uriVariables?: UriVariable,
 
-    /**
-     * request body
-     */
-    requestBody?: any,
-
-    /**
-     * request headers
-     */
-    headers?: HeadersInit
 }
 
 /**

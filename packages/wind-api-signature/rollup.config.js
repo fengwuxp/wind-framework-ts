@@ -23,9 +23,9 @@ const getConfig = (isProd) => {
         // https://rollupjs.org/guide/en#external-e-external
         external: [
             "md5",
-            "wind-common-utils",
             "jsrsasign",
-            "@babel/runtime-corejs3"
+            "@babel/runtime-corejs3",
+            "wind-common-utils/lib/string/StringUtils"
         ],
         output: [
             {
@@ -66,7 +66,7 @@ const getConfig = (isProd) => {
             }),
             babel({
                 exclude: "node_modules/**",
-               // babelHelpers: "runtime",
+                // babelHelpers: "runtime",
                 extensions: [...DEFAULT_EXTENSIONS, ".ts", ".tsx"]
             }),
             analyze({

@@ -11,7 +11,8 @@ import {
     RefreshTokenAuthenticationStrategy,
     RestTemplate,
     RoutingClientHttpRequestInterceptor,
-    TraceClientHttpRequestInterceptor
+    TraceClientHttpRequestInterceptor,
+    DateEncoder, HttpRequestCodec, stringDateConverter
 } from "wind-http";
 import MockHttpAdapter from "./MockHttpAdapter";
 
@@ -53,7 +54,9 @@ export default class MockFeignClientConfigurer implements FeignClientConfigurer 
             }))
         ], HttpMediaType.APPLICATION_JSON);
         return {
-            restTemplate: new RestTemplate(httpClient)
+            restTemplate: new RestTemplate(httpClient, {
+                codec: new HttpRequestCodec([new DateEncoder(stringDateConverter())])
+            })
         }
     }
 }

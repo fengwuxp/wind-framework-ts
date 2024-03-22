@@ -4,7 +4,7 @@ import {
     filterNoneValueAndNewObject,
     QueryParamType,
     RestfulHttpRequest,
-    restfulResponseExtractor,
+    restfulResponseExtractorFactory,
     supportRequestBody,
     SupportSerializableBody
 } from "wind-http";
@@ -67,7 +67,7 @@ export default class DefaultHttpFeignClientExecutor<T extends FeignProxyClient =
         return restTemplate.exchange({
             ...httpRequest,
             url: requestURL
-        } as RestfulHttpRequest, options, restfulResponseExtractor(httpRequest.method))
+        } as RestfulHttpRequest, options, restfulResponseExtractorFactory(httpRequest.method))
     };
 
     /**
@@ -107,7 +107,7 @@ export default class DefaultHttpFeignClientExecutor<T extends FeignProxyClient =
         };
         const requestSupportRequestBody = supportRequestBody(requestMapping.method);
         if (requestSupportRequestBody) {
-            result.requestBody = this.resolveRequestBody(originalParameter, options.filterNoneValue);
+            result.body = this.resolveRequestBody(originalParameter, options.filterNoneValue);
         } else {
             result.uriVariables = this.resolveQueryPrams(originalParameter, requestMapping.params ?? {});
         }
@@ -151,15 +151,15 @@ export default class DefaultHttpFeignClientExecutor<T extends FeignProxyClient =
         return requestMappingParams;
     }
 
-    private resolverRequestHeaders = (feignRequestOptions: FeignRequestOptions, methodName: string) => {
+    private resolverRequestHeaders = (request: Partial<RestfulHttpRequest>, methodName: string) => {
         const {configuration, apiService} = this;
         const {requestHeaderResolver, globalHeaders} = configuration;
         // resolver headers
-        const {headers, body, queryParams} = feignRequestOptions;
+        const {headers, body, uriVariables} = request;
         const requestHeaders = requestHeaderResolver(apiService, methodName, headers, body as object);
         return {
             ...globalHeaders,
-            ...requestHeaderResolver(apiService, methodName, requestHeaders, queryParams)
+            ...requestHeaderResolver(apiService, methodName, requestHeaders, uriVariables)
         }
     }
 }

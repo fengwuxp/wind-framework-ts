@@ -1,3 +1,4 @@
+import { DateFormatType } from 'wind-common-utils/lib/date/DateFormatUtils';
 import { PathMatcher } from 'wind-common-utils/lib/match/PathMatcher';
 import { ParsedUrlQueryInput } from 'querystring';
 
@@ -40,9 +41,9 @@ interface HttpRequest {
      * http request method
      * {@see HttpMethod}
      */
-    method: HttpMethod | string;
+    method: HttpMethod;
     /**
-     * 请求url
+     * 请求 url，包含查询参数
      */
     url: string;
     /**
@@ -570,6 +571,231 @@ declare const getRealRequestUrl: (url: string) => string;
  */
 declare const appendRouteMapping: (routeMapping: Record<string, string>) => void;
 
+type DateConverter = (date: Date) => number | string;
+declare const timeStampDateConverter: DateConverter;
+declare const stringDateConverter: (fmt?: DateFormatType) => DateConverter;
+
+/**
+ * Generic callback interface used by {@link RestTemplate}'s retrieval methods
+ * Implementations of this interface perform the actual work of extracting data
+ * from a {@link HttpResponse}, but don't need to worry about exception
+ * handling or closing resources.
+ *
+ * <p>Used internally by the {@link RestTemplate}, but also useful for application code.
+ *
+ */
+interface ResponseExtractorInterface<T = any> {
+    extractData: ResponseExtractorFunction<T>;
+}
+/**
+ * Extract data from the given {@code HttpResponse} and return it.
+ * @param response the HTTP response
+ * @return the extracted data
+ */
+type ResponseExtractorFunction<T = any> = (response: HttpResponse, businessAssert?: BusinessResponseExtractorFunction) => T | Promise<T> | null | undefined;
+type ResponseExtractor<T = any> = ResponseExtractorFunction<T> | ResponseExtractorInterface<T>;
+/**
+ * Judge whether the business is successfully processed and capture the data results of business response
+ * @param response Body the HTTP response
+ * @return  if request business handle success return business data , else return {@link Promise#reject}
+ */
+type BusinessResponseExtractorFunction<B = any, T = any> = (responseBody: B) => T | Promise<T> | null | undefined | void;
+
+interface RestfulHttpRequest extends HttpRequest {
+    /**
+     * request url or request pattern
+     * example: https://www.example.com/ap1/v1/users/{id}?name={name}
+     */
+    url: string;
+    /**
+     * uri params  and query params
+     */
+    uriVariables?: UriVariable;
+}
+/**
+ * Interface specifying a basic set of RESTful operations.
+ * Implemented by {@link RestTemplate}. Not often used directly, but a useful
+ * option to enhance testability, as it can easily be mocked or stubbed.
+ */
+interface RestOperations {
+    /**
+     * Retrieve a representation by doing a GET on the specified URL.
+     * The response (if any) is converted and returned.
+     * <p>URI Template variables are expanded using the given URI variables, if any.
+     * @param url the URL
+     * @param uriVariables the variables to expand the template  or  uriVariables the map containing variables for the URI template
+     * @param headers
+     * @return the converted object
+     * @see {@link UriVariable}
+     */
+    getForObject: <E = any>(url: string, uriVariables?: UriVariable, headers?: HeadersInit, context?: HttpRequestContextAttributes) => Promise<E>;
+    /**
+     * Retrieve a representation by doing a GET on the URI template.
+     * The response is converted and stored in an {@link HttpResponse}.
+     * <p>URI Template variables are expanded using the given map.
+     * @param url the URL
+     * @param uriVariables the variables to expand the template  or  uriVariables the map containing variables for the URI template
+     * @param headers
+     * @return the converted object
+     * @see {@link UriVariable}
+     */
+    getForEntity: <E = any>(url: string, uriVariables?: UriVariable, headers?: HeadersInit, context?: HttpRequestContextAttributes) => Promise<HttpResponse<E>>;
+    /**
+     * Retrieve all headers of the resource specified by the URI template.
+     * <p>URI Template variables are expanded using the given map.
+     * @param url the URL
+     * @param uriVariables the variables to expand the template  or  uriVariables the map containing variables for the URI template
+     * @param headers
+     * @return all HTTP headers of that resource
+     * @see {@link UriVariable}
+     */
+    headForHeaders: (url: string, uriVariables?: UriVariable, headers?: HeadersInit, context?: HttpRequestContextAttributes) => Promise<Record<string, string>>;
+    /**
+     * Create a new resource by POSTing the given object to the URI template,
+     * and returns the response as {@link HttpResponse}.
+     * <p>URI Template variables are expanded using the given URI variables, if any.
+     * <p>The {@code request} parameter can be a {@link HttpRequest} in order to
+     * add additional HTTP headers to the request.
+     * <p>The body of the entity, or {@code request} itself, can be a
+     * @param url the URL
+     * @param requestBody the Object to be POSTed (may be {@code null})
+     * @param uriVariables the variables to expand the template  or  uriVariables the map containing variables for the URI template
+     * @param headers
+     * @return the converted object
+     * @see {@link UriVariable}
+     */
+    postForEntity: <E = any>(url: string, requestBody: any, uriVariables?: UriVariable, headers?: HeadersInit, context?: HttpRequestContextAttributes) => Promise<HttpResponse<E>>;
+    /**
+     * Create a new resource by POSTing the given object to the URI template, and returns the value of
+     * the {@code Location} header. This header typically indicates where the new resource is stored.
+     * <p>URI Template variables are expanded using the given map.
+     * <p>The {@code request} parameter can be a {@link HttpRequest} in order to
+     * add additional HTTP headers to the request
+     * <p>The body of the entity, or {@code request} itself, can be a
+     * @param url the URL
+     * @param requestBody the Object to be POSTed (may be {@code null})
+     * @param uriVariables the variables to expand the template  or  uriVariables the map containing variables for the URI template
+     * @param headers
+     * @return the value for the {@code Location} header
+     * @see {@link UriVariable}
+     */
+    postForLocation: (url: string, requestBody: any, uriVariables?: UriVariable, headers?: HeadersInit, context?: HttpRequestContextAttributes) => Promise<string>;
+    /**
+     * Create a new resource by POSTing the given object to the URI template,
+     * and returns the representation found in the response.
+     * <p>URI Template variables are expanded using the given URI variables, if any.
+     * <p>The {@code request} parameter can be a {@link HttpRequest} in order to
+     * add additional HTTP headers to the request.
+     * <p>The body of the entity, or {@code request} itself, can be a
+     * @param url the URL
+     * @param requestBody the Object to be POSTed (may be {@code null})
+     * @param uriVariables the variables to expand the template  or  uriVariables the map containing variables for the URI template
+     * @param headers
+     * @return the converted object
+     * @see {@link UriVariable}
+     */
+    postForObject: <E = any>(url: string, requestBody: any, uriVariables?: UriVariable, headers?: HeadersInit, context?: HttpRequestContextAttributes) => Promise<E>;
+    /**
+     * Create or update a resource by PUTting the given object to the URI.
+     * <p>URI Template variables are expanded using the given URI variables, if any.
+     * <p>The {@code request} parameter can be a {@link HttpRequest} in order to
+     * add additional HTTP headers to the request.
+     * @param url the URL
+     * @param requestBody the Object to be PUT (may be {@code null})
+     * @param uriVariables the variables to expand the template  or  uriVariables the map containing variables for the URI template
+     * @param headers
+     * @see {@link UriVariable}
+     */
+    put: (url: string, requestBody: any, uriVariables?: UriVariable, headers?: HeadersInit, context?: HttpRequestContextAttributes) => Promise<void>;
+    /**
+     * Update a resource by PATCHing the given object to the URL,
+     * and return the representation found in the response.
+     * <p>The {@code request} parameter can be a {@link HttpRequest} in order to
+     * add additional HTTP headers to the request.
+     * <p><b>NOTE: The standard JDK HTTP library does not support HTTP PATCH.
+     * You need to use the Apache HttpComponents or OkHttp request factory.</b>
+     * @param url the URL
+     * @param requestBody the object to be PATCHed (may be {@code null})
+     * @param uriVariables the variables to expand the template  or  uriVariables the map containing variables for the URI template
+     * @param headers
+     * @return the converted object
+     * @see {@link UriVariable}
+     */
+    patchForObject: <E = any>(url: string, requestBody: any, uriVariables?: UriVariable, headers?: HeadersInit, context?: HttpRequestContextAttributes) => Promise<E>;
+    /**
+     * Delete the resources at the specified URI.
+     * <p>URI Template variables are expanded using the given URI variables, if any.
+     * @param url the URL
+     * @param uriVariables the variables to expand the template  or  uriVariables the map containing variables for the URI template
+     * @param headers
+     * @see {@link UriVariable}
+     */
+    delete: (url: string, uriVariables?: UriVariable, headers?: HeadersInit, context?: HttpRequestContextAttributes) => Promise<void>;
+    /**
+     * Return the value of the Allow header for the given URI.
+     * <p>URI Template variables are expanded using the given map.
+     * @param url the URL
+     * @param uriVariables the variables to expand the template  or  uriVariables the map containing variables for the URI template
+     * @param headers
+     * @return the value of the allow header
+     * @see {@link UriVariable}
+     */
+    optionsForAllow: (url: string, uriVariables?: UriVariable, headers?: HeadersInit, context?: HttpRequestContextAttributes) => Promise<HttpMethod[]>;
+    /**
+     * Execute the HTTP method to the given URL, preparing the request with the，and reading the response with a {@link ResponseExtractor}.
+     * @param request restful http request
+     * @param responseExtractor object that extracts the return value from the response
+     * @param context
+     * @return an arbitrary object, as returned by the {@link ResponseExtractor}
+     */
+    exchange: <E = any>(request: RestfulHttpRequest, context?: HttpRequestContextAttributes, responseExtractor?: ResponseExtractor<E>) => Promise<E>;
+}
+
+/**
+ *  request data encoder
+ */
+interface HttpRequestDataEncoder {
+    /**
+     * encode
+     * @param request
+     * @param otherArgs 其他参数
+     */
+    encode: (request: RestfulHttpRequest) => Promise<RestfulHttpRequest>;
+}
+
+/**
+ * encode/format the Date type in the request data or query params
+ * Default conversion to timestamp
+ */
+declare class DateEncoder implements HttpRequestDataEncoder {
+    private dateConverter;
+    constructor(dateConverter?: DateConverter);
+    encode: (request: RestfulHttpRequest) => Promise<RestfulHttpRequest>;
+    private converterDate;
+}
+
+/**
+ * response data
+ */
+interface HttpResponseDataDecoder<E = any> {
+    /**
+     * decode
+     * @param response
+     */
+    decode: (response: E) => E;
+}
+
+/**
+ * http codec
+ */
+declare class HttpRequestCodec {
+    protected encoders: HttpRequestDataEncoder[];
+    protected decoders: HttpResponseDataDecoder[];
+    constructor(encoders: HttpRequestDataEncoder[], decoders?: HttpResponseDataDecoder[]);
+    response: <E = any>(request: RestfulHttpRequest, response: E) => Promise<E>;
+    request: (request: RestfulHttpRequest) => Promise<RestfulHttpRequest>;
+}
+
 interface HttpResponseEventPublisher {
     publishEvent: (request: HttpRequest, response: HttpResponse) => void;
 }
@@ -979,194 +1205,6 @@ type ResponseErrorHandlerFunction<T extends HttpRequest = HttpRequest, E = any> 
 type ResponseErrorHandler<T extends HttpRequest = HttpRequest, E = any> = ResponseErrorHandlerInterFace<T> | ResponseErrorHandlerFunction<T>;
 
 /**
- * Generic callback interface used by {@link RestTemplate}'s retrieval methods
- * Implementations of this interface perform the actual work of extracting data
- * from a {@link HttpResponse}, but don't need to worry about exception
- * handling or closing resources.
- *
- * <p>Used internally by the {@link RestTemplate}, but also useful for application code.
- *
- */
-interface ResponseExtractorInterface<T = any> {
-    extractData: ResponseExtractorFunction<T>;
-}
-/**
- * Extract data from the given {@code HttpResponse} and return it.
- * @param response the HTTP response
- * @return the extracted data
- */
-type ResponseExtractorFunction<T = any> = (response: HttpResponse, businessAssert?: BusinessResponseExtractorFunction) => T | Promise<T> | null | undefined;
-type ResponseExtractor<T = any> = ResponseExtractorFunction<T> | ResponseExtractorInterface<T>;
-/**
- * Judge whether the business is successfully processed and capture the data results of business response
- * @param response Body the HTTP response
- * @return  if request business handle success return business data , else return {@link Promise#reject}
- */
-type BusinessResponseExtractorFunction<B = any, T = any> = (responseBody: B) => T | Promise<T> | null | undefined | void;
-
-interface RestfulHttpRequest {
-    /**
-     * request method
-     */
-    method: HttpMethod;
-    /**
-     * request url or request pattern
-     * example: https://www.example.com/ap1/v1/users/{id}?name={name}
-     */
-    url: string;
-    /**
-     * uri params  and query params
-     */
-    uriVariables?: UriVariable;
-    /**
-     * request body
-     */
-    requestBody?: any;
-    /**
-     * request headers
-     */
-    headers?: HeadersInit;
-}
-/**
- * Interface specifying a basic set of RESTful operations.
- * Implemented by {@link RestTemplate}. Not often used directly, but a useful
- * option to enhance testability, as it can easily be mocked or stubbed.
- */
-interface RestOperations {
-    /**
-     * Retrieve a representation by doing a GET on the specified URL.
-     * The response (if any) is converted and returned.
-     * <p>URI Template variables are expanded using the given URI variables, if any.
-     * @param url the URL
-     * @param uriVariables the variables to expand the template  or  uriVariables the map containing variables for the URI template
-     * @param headers
-     * @return the converted object
-     * @see {@link UriVariable}
-     */
-    getForObject: <E = any>(url: string, uriVariables?: UriVariable, headers?: HeadersInit, context?: HttpRequestContextAttributes) => Promise<E>;
-    /**
-     * Retrieve a representation by doing a GET on the URI template.
-     * The response is converted and stored in an {@link HttpResponse}.
-     * <p>URI Template variables are expanded using the given map.
-     * @param url the URL
-     * @param uriVariables the variables to expand the template  or  uriVariables the map containing variables for the URI template
-     * @param headers
-     * @return the converted object
-     * @see {@link UriVariable}
-     */
-    getForEntity: <E = any>(url: string, uriVariables?: UriVariable, headers?: HeadersInit, context?: HttpRequestContextAttributes) => Promise<HttpResponse<E>>;
-    /**
-     * Retrieve all headers of the resource specified by the URI template.
-     * <p>URI Template variables are expanded using the given map.
-     * @param url the URL
-     * @param uriVariables the variables to expand the template  or  uriVariables the map containing variables for the URI template
-     * @param headers
-     * @return all HTTP headers of that resource
-     * @see {@link UriVariable}
-     */
-    headForHeaders: (url: string, uriVariables?: UriVariable, headers?: HeadersInit, context?: HttpRequestContextAttributes) => Promise<Record<string, string>>;
-    /**
-     * Create a new resource by POSTing the given object to the URI template,
-     * and returns the response as {@link HttpResponse}.
-     * <p>URI Template variables are expanded using the given URI variables, if any.
-     * <p>The {@code request} parameter can be a {@link HttpRequest} in order to
-     * add additional HTTP headers to the request.
-     * <p>The body of the entity, or {@code request} itself, can be a
-     * @param url the URL
-     * @param requestBody the Object to be POSTed (may be {@code null})
-     * @param uriVariables the variables to expand the template  or  uriVariables the map containing variables for the URI template
-     * @param headers
-     * @return the converted object
-     * @see {@link UriVariable}
-     */
-    postForEntity: <E = any>(url: string, requestBody: any, uriVariables?: UriVariable, headers?: HeadersInit, context?: HttpRequestContextAttributes) => Promise<HttpResponse<E>>;
-    /**
-     * Create a new resource by POSTing the given object to the URI template, and returns the value of
-     * the {@code Location} header. This header typically indicates where the new resource is stored.
-     * <p>URI Template variables are expanded using the given map.
-     * <p>The {@code request} parameter can be a {@link HttpRequest} in order to
-     * add additional HTTP headers to the request
-     * <p>The body of the entity, or {@code request} itself, can be a
-     * @param url the URL
-     * @param requestBody the Object to be POSTed (may be {@code null})
-     * @param uriVariables the variables to expand the template  or  uriVariables the map containing variables for the URI template
-     * @param headers
-     * @return the value for the {@code Location} header
-     * @see {@link UriVariable}
-     */
-    postForLocation: (url: string, requestBody: any, uriVariables?: UriVariable, headers?: HeadersInit, context?: HttpRequestContextAttributes) => Promise<string>;
-    /**
-     * Create a new resource by POSTing the given object to the URI template,
-     * and returns the representation found in the response.
-     * <p>URI Template variables are expanded using the given URI variables, if any.
-     * <p>The {@code request} parameter can be a {@link HttpRequest} in order to
-     * add additional HTTP headers to the request.
-     * <p>The body of the entity, or {@code request} itself, can be a
-     * @param url the URL
-     * @param requestBody the Object to be POSTed (may be {@code null})
-     * @param uriVariables the variables to expand the template  or  uriVariables the map containing variables for the URI template
-     * @param headers
-     * @return the converted object
-     * @see {@link UriVariable}
-     */
-    postForObject: <E = any>(url: string, requestBody: any, uriVariables?: UriVariable, headers?: HeadersInit, context?: HttpRequestContextAttributes) => Promise<E>;
-    /**
-     * Create or update a resource by PUTting the given object to the URI.
-     * <p>URI Template variables are expanded using the given URI variables, if any.
-     * <p>The {@code request} parameter can be a {@link HttpRequest} in order to
-     * add additional HTTP headers to the request.
-     * @param url the URL
-     * @param requestBody the Object to be PUT (may be {@code null})
-     * @param uriVariables the variables to expand the template  or  uriVariables the map containing variables for the URI template
-     * @param headers
-     * @see {@link UriVariable}
-     */
-    put: (url: string, requestBody: any, uriVariables?: UriVariable, headers?: HeadersInit, context?: HttpRequestContextAttributes) => Promise<void>;
-    /**
-     * Update a resource by PATCHing the given object to the URL,
-     * and return the representation found in the response.
-     * <p>The {@code request} parameter can be a {@link HttpRequest} in order to
-     * add additional HTTP headers to the request.
-     * <p><b>NOTE: The standard JDK HTTP library does not support HTTP PATCH.
-     * You need to use the Apache HttpComponents or OkHttp request factory.</b>
-     * @param url the URL
-     * @param requestBody the object to be PATCHed (may be {@code null})
-     * @param uriVariables the variables to expand the template  or  uriVariables the map containing variables for the URI template
-     * @param headers
-     * @return the converted object
-     * @see {@link UriVariable}
-     */
-    patchForObject: <E = any>(url: string, requestBody: any, uriVariables?: UriVariable, headers?: HeadersInit, context?: HttpRequestContextAttributes) => Promise<E>;
-    /**
-     * Delete the resources at the specified URI.
-     * <p>URI Template variables are expanded using the given URI variables, if any.
-     * @param url the URL
-     * @param uriVariables the variables to expand the template  or  uriVariables the map containing variables for the URI template
-     * @param headers
-     * @see {@link UriVariable}
-     */
-    delete: (url: string, uriVariables?: UriVariable, headers?: HeadersInit, context?: HttpRequestContextAttributes) => Promise<void>;
-    /**
-     * Return the value of the Allow header for the given URI.
-     * <p>URI Template variables are expanded using the given map.
-     * @param url the URL
-     * @param uriVariables the variables to expand the template  or  uriVariables the map containing variables for the URI template
-     * @param headers
-     * @return the value of the allow header
-     * @see {@link UriVariable}
-     */
-    optionsForAllow: (url: string, uriVariables?: UriVariable, headers?: HeadersInit, context?: HttpRequestContextAttributes) => Promise<HttpMethod[]>;
-    /**
-     * Execute the HTTP method to the given URL, preparing the request with the，and reading the response with a {@link ResponseExtractor}.
-     * @param request restful http request
-     * @param responseExtractor object that extracts the return value from the response
-     * @param context
-     * @return an arbitrary object, as returned by the {@link ResponseExtractor}
-     */
-    exchange: <E = any>(request: RestfulHttpRequest, context?: HttpRequestContextAttributes, responseExtractor?: ResponseExtractor<E>) => Promise<E>;
-}
-
-/**
  * void response extractor
  * @param response
  */
@@ -1188,20 +1226,24 @@ declare const headResponseExtractor: (response: HttpResponse) => Promise<Record<
  */
 declare const optionsMethodResponseExtractor: (response: HttpResponse) => Promise<HttpMethod[]>;
 /**
- *
- * @param method
+ * 通过 http 请求方法获取一个 ResponseExtractor
+ * @param method http method
  */
-declare const restfulResponseExtractor: (method: HttpMethod) => ResponseExtractorFunction<any>;
+declare const restfulResponseExtractorFactory: (method: HttpMethod) => ResponseExtractorFunction<any>;
 
+interface RestTemplateOptions {
+    uriTemplateHandler?: UriTemplateHandler;
+    responseErrorHandler?: ResponseErrorHandler;
+    businessResponseExtractor?: BusinessResponseExtractorFunction;
+    codec?: HttpRequestCodec;
+}
 /**
  * http rest template
  */
 declare class RestTemplate implements RestOperations {
     private readonly httpClient;
-    private _uriTemplateHandler;
-    private _responseErrorHandler;
-    private businessResponseExtractor;
-    constructor(httpClient: HttpClient, businessResponseExtractor?: BusinessResponseExtractorFunction);
+    private readonly options;
+    constructor(httpClient: HttpClient, options?: RestTemplateOptions);
     delete: (url: string, uriVariables?: UriVariable, headers?: Record<string, string>, context?: HttpRequestContextAttributes) => Promise<void>;
     getForEntity: <E = any>(url: string, uriVariables?: UriVariable, headers?: Record<string, string>, context?: HttpRequestContextAttributes) => Promise<HttpResponse<E>>;
     getForObject: <E = any>(url: string, uriVariables?: UriVariable, headers?: Record<string, string>, context?: HttpRequestContextAttributes) => Promise<E>;
@@ -1213,8 +1255,6 @@ declare class RestTemplate implements RestOperations {
     postForObject: <E = any>(url: string, requestBody: any, uriVariables?: UriVariable, headers?: Record<string, string>, context?: HttpRequestContextAttributes) => Promise<E>;
     put: (url: string, requestBody: any, uriVariables?: UriVariable, headers?: Record<string, string>, context?: HttpRequestContextAttributes) => Promise<void>;
     exchange: <E = any>(request: RestfulHttpRequest, context?: HttpRequestContextAttributes, responseExtractor?: ResponseExtractor<E>) => Promise<E>;
-    set uriTemplateHandler(uriTemplateHandler: UriTemplateHandler);
-    set responseErrorHandler(responseErrorHandler: ResponseErrorHandler);
 }
 
 type CloseRequestProgressBarFunction = () => void;
@@ -1310,4 +1350,4 @@ declare const queryStringify: (obj: ParsedUrlQueryInput, filterNoneValue?: boole
  */
 declare const replacePathVariableValue: (uriTemplate: string, uriVariables: UriVariable) => string;
 
-export { AbstractHttpClient, AbstractLog4jLogger, AuthenticationClientHttpRequestInterceptor, AuthenticationStrategy, AuthenticationToken, BusinessResponseExtractorFunction, CONTENT_LENGTH_HEAD_NAME, CONTENT_TRANSFER_ENCODING_HEAD_NAME, CONTENT_TYPE_HEAD_NAME, ClientHttpRequestInterceptor, ConsoleLogger, DEFAULT_SERVICE_NAME, DefaultHttpClient, DefaultHttpLo4jFactory, DefaultNoneNetworkFailBack as DefaultNetworkStatusListener, DefaultUriTemplateHandler, HTTPS_SCHEMA, HTTP_SCHEMA, HttpAdapter, HttpClient, HttpLog4jFactory, HttpMediaType, HttpMethod, HttpRequest, HttpRequestContextAttributes, HttpResponse, HttpResponseEventHandler, HttpResponseEventHandlerSupplier, HttpResponseEventListener, HttpResponseEventPublisher, HttpResponseEventPublisherInterceptor, HttpRetryOptions, HttpStatus, LB_SCHEMA, Log4jLevel, Log4jLogger, MappedClientHttpRequestInterceptor, MappedInterceptor, NetworkClientHttpRequestInterceptor, NetworkStatus, NetworkStatusListener, NetworkType, NoneNetworkFailBack, ProcessBarClientHttpRequestInterceptor, QueryParamType, RefreshTokenAuthenticationStrategy, RequestProgressBarFunction, ResponseErrorHandler, ResponseErrorHandlerFunction, ResponseErrorHandlerInterFace, ResponseExtractor, ResponseExtractorFunction, ResponseExtractorInterface, RestOperations, RestTemplate, RestfulHttpRequest, RetryHttpClient, RoutingClientHttpRequestInterceptor, SimpleHttpResponseEventListener, SimpleHttpResponseEventPublisher, SimpleNoneNetworkFailBack as SimpleNetworkStatusListener, SmartHttpResponseEventListener, SupportSerializableBody, TraceClientHttpRequestInterceptor, UNAUTHORIZED_RESPONSE, UriTemplateHandler, UriTemplateHandlerFunction, UriTemplateHandlerInterface, UriVariable, appendRouteMapping, convertFunctionInterface, defaultUriTemplateFunctionHandler, filterNoneValueAndNewObject, getRealRequestUrl, headResponseExtractor, matchMediaType, objectResponseExtractor, optionsMethodResponseExtractor, queryStringify, replacePathVariableValue, responseIsFile, responseIsJson, responseIsText, restfulResponseExtractor, serializeRequestBody, setDefaultHttpLo4jFactory, supportRequestBody, voidResponseExtractor };
+export { AbstractHttpClient, AbstractLog4jLogger, AuthenticationClientHttpRequestInterceptor, AuthenticationStrategy, AuthenticationToken, BusinessResponseExtractorFunction, CONTENT_LENGTH_HEAD_NAME, CONTENT_TRANSFER_ENCODING_HEAD_NAME, CONTENT_TYPE_HEAD_NAME, ClientHttpRequestInterceptor, ConsoleLogger, DEFAULT_SERVICE_NAME, DateConverter, DateEncoder, DefaultHttpClient, DefaultHttpLo4jFactory, DefaultNoneNetworkFailBack as DefaultNetworkStatusListener, DefaultUriTemplateHandler, HTTPS_SCHEMA, HTTP_SCHEMA, HttpAdapter, HttpClient, HttpLog4jFactory, HttpMediaType, HttpMethod, HttpRequest, HttpRequestCodec, HttpRequestContextAttributes, HttpRequestDataEncoder, HttpResponse, HttpResponseDataDecoder, HttpResponseEventHandler, HttpResponseEventHandlerSupplier, HttpResponseEventListener, HttpResponseEventPublisher, HttpResponseEventPublisherInterceptor, HttpRetryOptions, HttpStatus, LB_SCHEMA, Log4jLevel, Log4jLogger, MappedClientHttpRequestInterceptor, MappedInterceptor, NetworkClientHttpRequestInterceptor, NetworkStatus, NetworkStatusListener, NetworkType, NoneNetworkFailBack, ProcessBarClientHttpRequestInterceptor, QueryParamType, RefreshTokenAuthenticationStrategy, RequestProgressBarFunction, ResponseErrorHandler, ResponseErrorHandlerFunction, ResponseErrorHandlerInterFace, ResponseExtractor, ResponseExtractorFunction, ResponseExtractorInterface, RestOperations, RestTemplate, RestfulHttpRequest, RetryHttpClient, RoutingClientHttpRequestInterceptor, SimpleHttpResponseEventListener, SimpleHttpResponseEventPublisher, SimpleNoneNetworkFailBack as SimpleNetworkStatusListener, SmartHttpResponseEventListener, SupportSerializableBody, TraceClientHttpRequestInterceptor, UNAUTHORIZED_RESPONSE, UriTemplateHandler, UriTemplateHandlerFunction, UriTemplateHandlerInterface, UriVariable, appendRouteMapping, convertFunctionInterface, defaultUriTemplateFunctionHandler, filterNoneValueAndNewObject, getRealRequestUrl, headResponseExtractor, matchMediaType, objectResponseExtractor, optionsMethodResponseExtractor, queryStringify, replacePathVariableValue, responseIsFile, responseIsJson, responseIsText, restfulResponseExtractorFactory, serializeRequestBody, setDefaultHttpLo4jFactory, stringDateConverter, supportRequestBody, timeStampDateConverter, voidResponseExtractor };

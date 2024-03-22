@@ -5,12 +5,15 @@ import MockHttpAdapter from "../mock/MockHttpAdapter";
 import {
     AuthenticationClientHttpRequestInterceptor,
     AuthenticationToken,
+    DateEncoder,
     DEFAULT_SERVICE_NAME,
     HttpMediaType,
     HttpRequest,
+    HttpRequestCodec,
     ProcessBarClientHttpRequestInterceptor,
     RefreshTokenAuthenticationStrategy,
     RoutingClientHttpRequestInterceptor,
+    stringDateConverter,
     TraceClientHttpRequestInterceptor
 } from "../../src";
 
@@ -59,7 +62,9 @@ describe("template test", () => {
         }))
     ], HttpMediaType.APPLICATION_JSON);
 
-    const restTemplate = new RestTemplate(defaultHttpClient);
+    const restTemplate = new RestTemplate(defaultHttpClient, {
+        codec: new HttpRequestCodec([new DateEncoder(stringDateConverter())])
+    });
 
     test("get for object path variable", async () => {
 
@@ -79,13 +84,13 @@ describe("template test", () => {
     }, 10 * 1000);
 
     test("get for object query string", async () => {
-
         try {
             const data = await restTemplate.getForObject(
                 "http://a.b.com/members",
                 {
                     id: 1,
-                    name: "李四"
+                    name: "李四",
+                    beginTime: new Date()
                 },
                 {}).then((data) => {
                 return data;

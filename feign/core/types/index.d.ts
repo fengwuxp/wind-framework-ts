@@ -169,7 +169,7 @@ type RequestURLResolver = (apiService: FeignProxyClient, methodName: string) => 
 /**
  * resolve request header
  */
-type RequestHeaderResolver = (apiService: FeignProxyClient, methodName: string, headers: Record<string, string>, data: UriVariable | object) => Record<string, string>;
+type RequestHeaderResolver = (apiService: FeignProxyClient, methodName: string, headers: HeadersInit, data: UriVariable | object) => HeadersInit;
 
 interface FeignClientConfiguration {
     restTemplate: RestOperations;
@@ -264,7 +264,7 @@ interface FeignClientExecutor<T extends FeignClient = FeignProxyClient, R = Prom
 type FeignClientExecutorFactory<T extends FeignClient = FeignProxyClient> = (client: T) => FeignClientExecutor;
 
 declare const registry: {
-    setFeignConfiguration(type: FeignClientType, apiModule: string, configuration: any): void;
+    setFeignConfiguration(type: FeignClientType, apiServiceName: string, configuration: any): void;
     getFeignConfiguration<C extends FeignClientConfiguration = FeignClientConfiguration>(type: FeignClientType, apiServiceName: string): Promise<Readonly<C>>;
     registerFeignClientExecutorFactory(type: FeignClientType, factory: FeignClientExecutorFactory): void;
     getFeignClientExecutorFactory(type: FeignClientType): FeignClientExecutorFactory;

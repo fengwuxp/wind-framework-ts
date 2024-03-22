@@ -32,7 +32,6 @@ describe("test feign client", () => {
         "statusText": "Not Found"
     }
 
-
     test("test feign client", async () => {
         sleep(200).then(() => {
             logger.info("异步设置设置配置")

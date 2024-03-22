@@ -88,13 +88,13 @@ const FEIGN_CLIENT_EXECUTOR_FACTORIES: Record<FeignClientType, FeignClientExecut
 
 const registry = {
 
-    setFeignConfiguration(type: FeignClientType, apiModule: string, configuration: any) {
-        getConfigurationCaches(type)[apiModule] = memorizationConfiguration(configuration);
-        const waitQueue = getWaitConfigurationQueue(type, apiModule);
-        if (getWaitConfigurationQueue(type, apiModule)?.length > 0) {
+    setFeignConfiguration(type: FeignClientType, apiServiceName: string, configuration: any) {
+        getConfigurationCaches(type)[apiServiceName] = memorizationConfiguration(configuration);
+        const waitQueue = getWaitConfigurationQueue(type, apiServiceName);
+        if (getWaitConfigurationQueue(type, apiServiceName)?.length > 0) {
             waitQueue.forEach(fn => fn(configuration));
             // clear
-            initWaitConfigurationQueue(type, apiModule);
+            initWaitConfigurationQueue(type, apiServiceName);
         }
     },
 

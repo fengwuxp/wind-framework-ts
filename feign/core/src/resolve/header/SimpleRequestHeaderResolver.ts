@@ -9,8 +9,8 @@ import {CONTENT_TYPE_HEAD_NAME, replacePathVariableValue, UriVariable} from "win
  */
 export const simpleRequestHeaderResolver: RequestHeaderResolver = (apiService: FeignProxyClient,
                                                                    methodName: string,
-                                                                   headers: Record<string, string>,
-                                                                   data?: UriVariable): Record<string, string> => {
+                                                                   headers: HeadersInit,
+                                                                   data?: UriVariable): HeadersInit => {
 
     const apiServiceConfig = apiService.getFeignMethodConfig(methodName);
     const requestMapping = apiServiceConfig.requestMapping;

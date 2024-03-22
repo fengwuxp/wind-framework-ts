@@ -32,10 +32,10 @@ export interface HttpRequest {
      * http request method
      * {@see HttpMethod}
      */
-    method: HttpMethod | string;
+    method: HttpMethod;
 
     /**
-     * 请求url
+     * 请求 url，包含查询参数
      */
     url: string;
 

@@ -15,6 +15,20 @@ import {
     optionsMethodResponseExtractor
 } from "./RestfulResponseExtractor";
 import {convertFunctionInterface} from "../utils/ConvertFunctionInterface";
+import HttpRequestCodec from "../codec/HttpRequestCodec";
+
+export interface RestTemplateOptions {
+    uriTemplateHandler?: UriTemplateHandler;
+    responseErrorHandler?: ResponseErrorHandler;
+    businessResponseExtractor?: BusinessResponseExtractorFunction;
+    codec?: HttpRequestCodec;
+}
+
+const DEFAULT_OPTIONS: Partial<RestTemplateOptions> = {
+    uriTemplateHandler: defaultUriTemplateFunctionHandler,
+    businessResponseExtractor: DEFAULT_BUSINESS_EXTRACTOR,
+    codec: new HttpRequestCodec([], [])
+}
 
 /**
  * http rest template
@@ -23,15 +37,14 @@ export default class RestTemplate implements RestOperations {
 
     private readonly httpClient: HttpClient;
 
-    private _uriTemplateHandler: UriTemplateHandler = defaultUriTemplateFunctionHandler;
+    private readonly options: RestTemplateOptions;
 
-    private _responseErrorHandler: ResponseErrorHandler;
-
-    private businessResponseExtractor: BusinessResponseExtractorFunction;
-
-    constructor(httpClient: HttpClient, businessResponseExtractor?: BusinessResponseExtractorFunction) {
+    constructor(httpClient: HttpClient, options?: RestTemplateOptions) {
         this.httpClient = httpClient;
-        this.businessResponseExtractor = businessResponseExtractor || DEFAULT_BUSINESS_EXTRACTOR;
+        this.options = {
+            ...DEFAULT_OPTIONS,
+            ...(options || {}),
+        }
     }
 
     delete = (url: string, uriVariables?: UriVariable, headers?: Record<string, string>, context?: HttpRequestContextAttributes): Promise<void> => {
@@ -84,7 +97,7 @@ export default class RestTemplate implements RestOperations {
             method: HttpMethod.PATCH,
             url,
             uriVariables,
-            requestBody,
+            body: requestBody,
             headers
         }, context, objectResponseExtractor);
     };
@@ -94,7 +107,7 @@ export default class RestTemplate implements RestOperations {
             method: HttpMethod.POST,
             url,
             uriVariables,
-            requestBody,
+            body: requestBody,
             headers
         }, context, null);
     };
@@ -104,7 +117,7 @@ export default class RestTemplate implements RestOperations {
             method: HttpMethod.POST,
             url,
             uriVariables,
-            requestBody,
+            body: requestBody,
             headers
         }, context, objectResponseExtractor);
     };
@@ -114,7 +127,7 @@ export default class RestTemplate implements RestOperations {
             method: HttpMethod.POST,
             url,
             uriVariables,
-            requestBody,
+            body: requestBody,
             headers
         }, context, objectResponseExtractor);
     };
@@ -124,23 +137,23 @@ export default class RestTemplate implements RestOperations {
             method: HttpMethod.PUT,
             url,
             uriVariables,
-            requestBody,
+            body: requestBody,
             headers
         }, context, objectResponseExtractor);
     };
 
     exchange = async <E = any>(request: RestfulHttpRequest, context?: HttpRequestContextAttributes, responseExtractor?: ResponseExtractor<E>): Promise<E> => {
-        const {url, method, uriVariables, requestBody, headers} = request;
-
         if (context == null) {
             context = {};
         }
         // handle url and query params
-        const {_uriTemplateHandler, _responseErrorHandler, businessResponseExtractor} = this;
+        const {uriTemplateHandler, responseErrorHandler, businessResponseExtractor, codec} = this.options;
+        const newRequest: RestfulHttpRequest = await codec.request(request);
 
+        const {url, method, uriVariables, body, headers} = newRequest;
         // handling path parameters in the request body, if any
-        const requestUrl = convertFunctionInterface<UriTemplateHandler, UriTemplateHandlerInterface>(_uriTemplateHandler, "expand")
-            .expand(replacePathVariableValue(url, requestBody), uriVariables);
+        const requestUrl = convertFunctionInterface<UriTemplateHandler, UriTemplateHandlerInterface>(uriTemplateHandler, "expand")
+            .expand(replacePathVariableValue(url, body as any), uriVariables);
 
         let httpClient = this.httpClient;
         if (context.retryOptions != null) {
@@ -153,18 +166,18 @@ export default class RestTemplate implements RestOperations {
             httpResponse = await httpClient.send({
                 url: requestUrl,
                 method,
-                body: requestBody,
+                body: body,
                 headers
             }, context);
         } catch (error) {
             // handle error
-            if (_responseErrorHandler) {
-                return convertFunctionInterface<ResponseErrorHandler, ResponseErrorHandlerInterFace>(_responseErrorHandler, "handleError").handleError(
+            if (responseErrorHandler) {
+                return convertFunctionInterface<ResponseErrorHandler, ResponseErrorHandlerInterFace>(responseErrorHandler, "handleError").handleError(
                     {
                         url: requestUrl,
                         method,
                         headers,
-                        body: requestBody
+                        body: body
                     }, error, context);
             }
             return Promise.reject(error);
@@ -173,15 +186,6 @@ export default class RestTemplate implements RestOperations {
         if (responseExtractor) {
             return convertFunctionInterface<ResponseExtractor<E>, ResponseExtractorInterface<E>>(responseExtractor, "extractData").extractData(httpResponse, businessResponseExtractor);
         }
-
-        return httpResponse;
+        return codec.response(newRequest, httpResponse);
     };
-
-    set uriTemplateHandler(uriTemplateHandler: UriTemplateHandler) {
-        this._uriTemplateHandler = uriTemplateHandler;
-    }
-
-    set responseErrorHandler(responseErrorHandler: ResponseErrorHandler) {
-        this._responseErrorHandler = responseErrorHandler;
-    }
 }

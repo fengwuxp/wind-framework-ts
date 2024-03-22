@@ -28,6 +28,13 @@ export {default as RetryHttpClient} from "./client/RetryHttpClient";
 
 export {getRealRequestUrl, appendRouteMapping} from "./context/RequestMappings";
 
+export {DateConverter, stringDateConverter, timeStampDateConverter} from "./codec/converter/DateConverter";
+export {default as DateEncoder} from "./codec/DateEncoder";
+export {default as HttpRequestCodec} from "./codec/HttpRequestCodec";
+export {HttpRequestDataEncoder} from "./codec/HttpRequestDataEncoder";
+export {HttpResponseDataDecoder} from "./codec/HttpResponseDataDecoder";
+
+
 export {HttpMediaType} from "./enums/HttpMediaType";
 export {HttpMethod} from "./enums/HttpMethod";
 export {HttpStatus} from "./enums/HttpStatus";
@@ -76,7 +83,7 @@ export {
     voidResponseExtractor,
     headResponseExtractor,
     optionsMethodResponseExtractor,
-    restfulResponseExtractor
+    restfulResponseExtractorFactory
 } from "./rest/RestfulResponseExtractor";
 export {default as RestTemplate} from "./rest/RestTemplate";
 export {UriTemplateHandler, UriTemplateHandlerInterface, UriTemplateHandlerFunction} from "./rest/UriTemplateHandler";
