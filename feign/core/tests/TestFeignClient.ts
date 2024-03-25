@@ -3,12 +3,12 @@ import {
     Feign,
     FeignRequestOptions,
     FeignRetry,
+    GetMapping,
     PostMapping,
     PutMapping,
     RequestMapping,
+    ValidateSchema
 } from "../src";
-import {GetMapping} from "../src/annotations/mapping/GetMapping";
-import {ValidateSchema} from '../src/annotations/validator/VailidatorSchema';
 import {HttpMediaType, HttpMethod} from "wind-http";
 
 
@@ -20,8 +20,6 @@ type FindMemberRequest = {
 
 @Feign({
     value: "/test",
-    // url:"http://a.bc.cn/api",
-    // configuration: MockFeignConfiguration
 })
 export default class TestFeignClient {
 

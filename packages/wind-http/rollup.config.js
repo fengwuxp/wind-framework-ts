@@ -12,6 +12,7 @@ import dts from "rollup-plugin-dts";
 
 import pkg from './package.json';
 import {DEFAULT_EXTENSIONS} from "@babel/core";
+import {HttpMediaType} from "wind-common-utils/lib/http/HttpMediaType";
 
 const cpuNums = os.cpus().length;
 
@@ -35,6 +36,7 @@ const getConfig = (isProd) => {
             "wind-common-utils",
             "wind-common-utils/lib/date/DateFormatUtils",
             "wind-common-utils/lib/match/SimplePathMatcher",
+            "wind-common-utils/lib/http/HttpMediaType",
             "wind-common-utils/lib/string/StringUtils"
         ],
         output: [

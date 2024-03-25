@@ -1,7 +1,6 @@
 import {ParsedUrlQueryInput} from "querystring";
-import {matchMediaType} from "./MediaTypeUtil";
 import {HttpMethod} from "../enums/HttpMethod";
-import {HttpMediaType} from "../enums/HttpMediaType";
+import {HttpMediaType, matchMediaType} from "wind-common-utils/lib/http/HttpMediaType";
 import {SupportSerializableBody} from "../Http";
 
 const supportBodyMethods = [HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH];
@@ -20,7 +19,7 @@ export const supportRequestBody = (method: HttpMethod | string) => {
  * @param contentType
  * @param filterNoneValue  filter none value
  */
-export const serializeRequestBody = (body: SupportSerializableBody ,
+export const serializeRequestBody = (body: SupportSerializableBody,
                                      contentType: HttpMediaType,
                                      filterNoneValue: boolean = false): string => {
 

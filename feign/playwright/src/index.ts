@@ -1,0 +1,1 @@
+export {default as PlaywrightHttpAdapter} from "./adapter/PlaywrightHttpAdapter"

@@ -80,6 +80,23 @@ const getSignHeaderName = (name: string, headerPrefix?: string) => {
 }
 
 
+export interface ApiRequestSignResult {
+
+    /**
+     * 签名的请求头
+     */
+    headers: Record<string, string>;
+
+    /**
+     * 仅在 debug 模式下返回
+     */
+    debugObject?: {
+        request: ApiSignatureRequest,
+        signatureText: string;
+        queryString: string;
+    }
+}
+
 export class ApiRequestSinger {
 
     private readonly secretAccount: ApiSecretAccount;
@@ -104,7 +121,7 @@ export class ApiRequestSinger {
      * @param request
      * @return 签名请求头对象
      */
-    sign = (request: Omit<ApiSignatureRequest, "nonce" | "timestamp">): Record<string, string> => {
+    sign = (request: Omit<ApiSignatureRequest, "nonce" | "timestamp">): ApiRequestSignResult => {
         const {secretAccount, apiSigner, options} = this;
         const signRequest: ApiSignatureRequest = {
             ...request,
@@ -113,18 +130,21 @@ export class ApiRequestSinger {
             timestamp: new Date().getTime().toString(),
         }
         const headerPrefix = options.headerPrefix;
-        const result = {
+        const signHeaders = {
             [getSignHeaderName(SIGN_HEADER_NAME, headerPrefix)]: apiSigner.sign(signRequest, secretAccount.secretKey),
             [getSignHeaderName(NONCE_HEADER_NAME, headerPrefix)]: signRequest.nonce,
             [getSignHeaderName(TIMESTAMP_HEADER_NAME, headerPrefix)]: signRequest.timestamp,
-            [getSignHeaderName(ACCESS_KEY_HEADER_NAME, headerPrefix)]: secretAccount.accessId,
-            [getSignHeaderName(SECRET_VERSION_HEADER_NAME, headerPrefix)]: secretAccount.secretVersion
+            [getSignHeaderName(ACCESS_KEY_HEADER_NAME, headerPrefix)]: secretAccount.accessId
         };
-
+        if (secretAccount.secretVersion) {
+            signHeaders[getSignHeaderName(SECRET_VERSION_HEADER_NAME, headerPrefix)] = secretAccount.secretVersion;
+        }
+        const result: ApiRequestSignResult = {
+            headers: signHeaders
+        }
         if (options.debug) {
             // debug 模式支持
-            // @ts-ignore
-            result['DebugHeaders'] = {
+            result.debugObject = {
                 request: signRequest,
                 // TODO 待优化
                 signatureText: apiSigner === HMAC_SHA256 ? getSignTextForDigest(signRequest) : getSignTextForSha256WithRsa(signRequest),

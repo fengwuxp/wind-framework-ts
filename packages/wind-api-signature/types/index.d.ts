@@ -1,22 +1,5 @@
 import { ApiSigner } from 'ApiSignatureAlgorithm';
 
-/**
- * http media type
- */
-declare enum HttpMediaType {
-    /**
-     * 表单
-     */
-    FORM = "application/x-www-form-urlencoded",
-    /**
-     * json
-     */
-    APPLICATION_JSON = "application/json",
-    /**
-     * JSON_UTF_8
-     */
-    APPLICATION_JSON_UTF8 = "application/json;charset=UTF-8"
-}
 interface ApiSignatureRequest {
     /**
      * http 请求方法
@@ -43,7 +26,6 @@ interface ApiSignatureRequest {
      */
     requestBody?: string;
 }
-declare const matchMediaType: (contentType: HttpMediaType | string, expectMediaType: HttpMediaType | string) => boolean;
 
 interface ApiSecretAccount {
     /**
@@ -70,6 +52,20 @@ interface ApiRequestSingerOptions {
      */
     debug?: boolean;
 }
+interface ApiRequestSignResult {
+    /**
+     * 签名的请求头
+     */
+    headers: Record<string, string>;
+    /**
+     * 仅在 debug 模式下返回
+     */
+    debugObject?: {
+        request: ApiSignatureRequest;
+        signatureText: string;
+        queryString: string;
+    };
+}
 declare class ApiRequestSinger {
     private readonly secretAccount;
     private readonly apiSigner;
@@ -81,7 +77,7 @@ declare class ApiRequestSinger {
      * @param request
      * @return 签名请求头对象
      */
-    sign: (request: Omit<ApiSignatureRequest, "nonce" | "timestamp">) => Record<string, string>;
+    sign: (request: Omit<ApiSignatureRequest, "nonce" | "timestamp">) => ApiRequestSignResult;
 }
 
-export { ApiRequestSinger, ApiRequestSingerOptions, ApiSecretAccount, ApiSignatureRequest, HttpMediaType, matchMediaType };
+export { ApiRequestSinger, ApiRequestSingerOptions, ApiSecretAccount, ApiSignatureRequest };

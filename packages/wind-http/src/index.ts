@@ -34,8 +34,7 @@ export {default as HttpRequestCodec} from "./codec/HttpRequestCodec";
 export {HttpRequestDataEncoder} from "./codec/HttpRequestDataEncoder";
 export {HttpResponseDataDecoder} from "./codec/HttpResponseDataDecoder";
 
-
-export {HttpMediaType} from "./enums/HttpMediaType";
+export {HttpMediaType, matchMediaType} from "wind-common-utils/lib/http/HttpMediaType";
 export {HttpMethod} from "./enums/HttpMethod";
 export {HttpStatus} from "./enums/HttpStatus";
 
@@ -92,7 +91,7 @@ export {default as ProcessBarClientHttpRequestInterceptor} from "./ui/ProcessBar
 export {RequestProgressBarFunction} from "./ui/RequestProgressBar";
 
 export {convertFunctionInterface} from "./utils/ConvertFunctionInterface";
-export {matchMediaType, responseIsJson, responseIsFile, responseIsText} from "./utils/MediaTypeUtil";
+export {responseIsJson, responseIsFile, responseIsText} from "./utils/MediaTypeUtil";
 export {
     supportRequestBody, serializeRequestBody, filterNoneValueAndNewObject, queryStringify
 } from "./utils/SerializeRequestBodyUtil";

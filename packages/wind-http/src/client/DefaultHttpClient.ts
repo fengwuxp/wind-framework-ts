@@ -1,12 +1,12 @@
 import {HttpAdapter, HttpRequest, HttpRequestContextAttributes, HttpResponse} from "../Http";
 import {ClientHttpRequestInterceptor} from "./ClientHttpRequestInterceptor";
-import {HttpMediaType} from "../enums/HttpMediaType";
 import MappedClientHttpRequestInterceptor from "../interceptor/MappedClientHttpRequestInterceptor";
 import {convertClientHttpRequestInterceptor} from "../utils/ConvertFunctionInterface";
 import {serializeRequestBody, supportRequestBody} from "../utils/SerializeRequestBodyUtil";
 import {CONTENT_TYPE_HEAD_NAME} from "../HttpConstants";
 import {AbstractHttpClient} from "./AbstractHttpClient";
 import {DefaultHttpLo4jFactory} from "../log/HttpLog4jFactory";
+import {HttpMediaType} from "wind-common-utils/lib/http/HttpMediaType";
 
 class InterceptingRequestExecution {
 
