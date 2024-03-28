@@ -1,4 +1,4 @@
-import {ApiSigner, HMAC_SHA256} from 'ApiSignatureAlgorithm';
+import {ApiSigner, HMAC_SHA256,SHA256_WITH_RSA} from './ApiSignatureAlgorithm';
 import {
     ApiSignatureRequest,
     getCanonicalizedQueryString,
@@ -114,6 +114,10 @@ export class ApiRequestSinger {
 
     static hmacSha256 = (secretAccount: ApiSecretAccount, options: ApiRequestSingerOptions = {headerPrefix: "Wind"}): ApiRequestSinger => {
         return new ApiRequestSinger(secretAccount, HMAC_SHA256, options);
+    }
+
+    static sha256WithRsa = (secretAccount: ApiSecretAccount, options: ApiRequestSingerOptions = {headerPrefix: "Wind"}): ApiRequestSinger => {
+        return new ApiRequestSinger(secretAccount, SHA256_WITH_RSA, options);
     }
 
     /**

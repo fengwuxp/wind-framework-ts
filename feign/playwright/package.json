@@ -30,7 +30,7 @@
     "build:ts": "rm -rf ./types && tsc -p ./tsconfig.lib.json --emitDeclarationOnly",
     "build:lib": "npm run test && rm -rf ./dist && rm -rf ./es  && npm run build:ts && rollup -c && rm -rf ./types-temp",
     "npm:publish": "npm publish",
-    "deploy:lib": "npm run build:lib && npm run build:esnext && npm run npm:publish"
+    "deploy:lib": "npm run build:lib && npm run npm:publish"
   },
   "keywords": [
     "tarojs",
@@ -40,7 +40,7 @@
   ],
   "dependencies": {
     "wind-http": "^1.0.0",
-    "playwright-core": "1.42.1"
+    "playwright-core": "^1.42.1"
   },
   "gitHead": "02618ca02969b87cc659c7aeb27646e7f26c3504"
 }

@@ -30,6 +30,7 @@ const getConfig = (isProd) => {
             "querystring",
             "lodash/memoize",
             "wind-proxy",
+            "wind-api-signature",
             "wind-common-utils",
             "wind-common-utils/lib/date/DateFormatUtils",
             "wind-common-utils/lib/match/SimplePathMatcher",

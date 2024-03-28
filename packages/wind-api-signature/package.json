@@ -1,6 +1,6 @@
 {
   "name": "wind-api-signature",
-  "version": "1.0.0",
+  "version": "1.0.5",
   "description": "wind api signature",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
@@ -36,6 +36,6 @@
   "dependencies": {
     "jsrsasign": "^11.1.0",
     "md5": "^2.3.0",
-    "wind-common-utils": "1.0.0"
+    "wind-common-utils": "^1.0.0"
   }
 }

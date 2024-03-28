@@ -1,6 +1,9 @@
 export {
     ApiRequestSinger,
     ApiSecretAccount,
-    ApiRequestSingerOptions
+    ApiRequestSingerOptions,
+    ApiRequestSignResult
 } from "./ApiRequestSinger";
-export {ApiSignatureRequest} from "./ApiSignatureRequest"
+export {ApiSigner} from "./ApiSignatureAlgorithm";
+export {ApiSignatureRequest} from "./ApiSignatureRequest";
+

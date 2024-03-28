@@ -1,6 +1,7 @@
 import { HttpMediaType } from 'wind-common-utils/lib/http/HttpMediaType';
 export { HttpMediaType, matchMediaType } from 'wind-common-utils/lib/http/HttpMediaType';
 import { DateFormatType } from 'wind-common-utils/lib/date/DateFormatUtils';
+import { ApiRequestSinger } from 'wind-api-signature';
 import { PathMatcher } from 'wind-common-utils/lib/match/PathMatcher';
 import { ParsedUrlQueryInput } from 'querystring';
 
@@ -848,6 +849,17 @@ declare class SimpleHttpResponseEventPublisher implements HttpResponseEventPubli
 }
 
 /**
+ * Api 签名
+ * https://www.yuque.com/suiyuerufeng-akjad/wind/zl1ygpq3pitl00qp
+ */
+declare class ApiSignatureRequestInterceptor<T extends HttpRequest> implements ClientHttpRequestInterceptorInterface<T> {
+    private static readonly LOG;
+    private readonly signer;
+    constructor(signer: ApiRequestSinger);
+    intercept: (request: T, context: any, next: any) => Promise<any>;
+}
+
+/**
  *  Authentication client http request interceptor
  *
  *  Support blocking 'authorization' refresh
@@ -1314,4 +1326,4 @@ declare const queryStringify: (obj: ParsedUrlQueryInput, filterNoneValue?: boole
  */
 declare const replacePathVariableValue: (uriTemplate: string, uriVariables: UriVariable) => string;
 
-export { AbstractHttpClient, AbstractLog4jLogger, AuthenticationClientHttpRequestInterceptor, AuthenticationStrategy, AuthenticationToken, BusinessResponseExtractorFunction, CONTENT_LENGTH_HEAD_NAME, CONTENT_TRANSFER_ENCODING_HEAD_NAME, CONTENT_TYPE_HEAD_NAME, ClientHttpRequestInterceptor, ConsoleLogger, DEFAULT_SERVICE_NAME, DateConverter, DateEncoder, DefaultHttpClient, DefaultHttpLo4jFactory, DefaultNoneNetworkFailBack as DefaultNetworkStatusListener, DefaultUriTemplateHandler, HTTPS_SCHEMA, HTTP_SCHEMA, HttpAdapter, HttpClient, HttpLog4jFactory, HttpMethod, HttpRequest, HttpRequestCodec, HttpRequestContextAttributes, HttpRequestDataEncoder, HttpResponse, HttpResponseDataDecoder, HttpResponseEventHandler, HttpResponseEventHandlerSupplier, HttpResponseEventListener, HttpResponseEventPublisher, HttpResponseEventPublisherInterceptor, HttpRetryOptions, HttpStatus, LB_SCHEMA, Log4jLevel, Log4jLogger, MappedClientHttpRequestInterceptor, MappedInterceptor, NetworkClientHttpRequestInterceptor, NetworkStatus, NetworkStatusListener, NetworkType, NoneNetworkFailBack, ProcessBarClientHttpRequestInterceptor, QueryParamType, RefreshTokenAuthenticationStrategy, RequestProgressBarFunction, ResponseErrorHandler, ResponseErrorHandlerFunction, ResponseErrorHandlerInterFace, ResponseExtractor, ResponseExtractorFunction, ResponseExtractorInterface, RestOperations, RestTemplate, RestfulHttpRequest, RetryHttpClient, RoutingClientHttpRequestInterceptor, SimpleHttpResponseEventListener, SimpleHttpResponseEventPublisher, SimpleNoneNetworkFailBack as SimpleNetworkStatusListener, SmartHttpResponseEventListener, SupportSerializableBody, TraceClientHttpRequestInterceptor, UNAUTHORIZED_RESPONSE, UriTemplateHandler, UriTemplateHandlerFunction, UriTemplateHandlerInterface, UriVariable, appendRouteMapping, convertFunctionInterface, defaultUriTemplateFunctionHandler, filterNoneValueAndNewObject, getRealRequestUrl, headResponseExtractor, objectResponseExtractor, optionsMethodResponseExtractor, queryStringify, replacePathVariableValue, responseIsFile, responseIsJson, responseIsText, restfulResponseExtractorFactory, serializeRequestBody, setDefaultHttpLo4jFactory, stringDateConverter, supportRequestBody, timeStampDateConverter, voidResponseExtractor };
+export { AbstractHttpClient, AbstractLog4jLogger, ApiSignatureRequestInterceptor, AuthenticationClientHttpRequestInterceptor, AuthenticationStrategy, AuthenticationToken, BusinessResponseExtractorFunction, CONTENT_LENGTH_HEAD_NAME, CONTENT_TRANSFER_ENCODING_HEAD_NAME, CONTENT_TYPE_HEAD_NAME, ClientHttpRequestInterceptor, ConsoleLogger, DEFAULT_SERVICE_NAME, DateConverter, DateEncoder, DefaultHttpClient, DefaultHttpLo4jFactory, DefaultNoneNetworkFailBack as DefaultNetworkStatusListener, DefaultUriTemplateHandler, HTTPS_SCHEMA, HTTP_SCHEMA, HttpAdapter, HttpClient, HttpLog4jFactory, HttpMethod, HttpRequest, HttpRequestCodec, HttpRequestContextAttributes, HttpRequestDataEncoder, HttpResponse, HttpResponseDataDecoder, HttpResponseEventHandler, HttpResponseEventHandlerSupplier, HttpResponseEventListener, HttpResponseEventPublisher, HttpResponseEventPublisherInterceptor, HttpRetryOptions, HttpStatus, LB_SCHEMA, Log4jLevel, Log4jLogger, MappedClientHttpRequestInterceptor, MappedInterceptor, NetworkClientHttpRequestInterceptor, NetworkStatus, NetworkStatusListener, NetworkType, NoneNetworkFailBack, ProcessBarClientHttpRequestInterceptor, QueryParamType, RefreshTokenAuthenticationStrategy, RequestProgressBarFunction, ResponseErrorHandler, ResponseErrorHandlerFunction, ResponseErrorHandlerInterFace, ResponseExtractor, ResponseExtractorFunction, ResponseExtractorInterface, RestOperations, RestTemplate, RestfulHttpRequest, RetryHttpClient, RoutingClientHttpRequestInterceptor, SimpleHttpResponseEventListener, SimpleHttpResponseEventPublisher, SimpleNoneNetworkFailBack as SimpleNetworkStatusListener, SmartHttpResponseEventListener, SupportSerializableBody, TraceClientHttpRequestInterceptor, UNAUTHORIZED_RESPONSE, UriTemplateHandler, UriTemplateHandlerFunction, UriTemplateHandlerInterface, UriVariable, appendRouteMapping, convertFunctionInterface, defaultUriTemplateFunctionHandler, filterNoneValueAndNewObject, getRealRequestUrl, headResponseExtractor, objectResponseExtractor, optionsMethodResponseExtractor, queryStringify, replacePathVariableValue, responseIsFile, responseIsJson, responseIsText, restfulResponseExtractorFactory, serializeRequestBody, setDefaultHttpLo4jFactory, stringDateConverter, supportRequestBody, timeStampDateConverter, voidResponseExtractor };

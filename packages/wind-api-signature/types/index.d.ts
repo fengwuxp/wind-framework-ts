@@ -1,5 +1,3 @@
-import { ApiSigner } from 'ApiSignatureAlgorithm';
-
 interface ApiSignatureRequest {
     /**
      * http 请求方法
@@ -25,6 +23,26 @@ interface ApiSignatureRequest {
      * 请求体，根据 content-type 序列化好的字符串
      */
     requestBody?: string;
+}
+
+interface ApiSigner {
+    /**
+     * 生成签名
+     *
+     * @param request   签名请求
+     * @param secretKey 签名秘钥
+     * @return 签名结果
+     */
+    sign: (request: ApiSignatureRequest, secretKey: string) => string;
+    /**
+     * 签名验证
+     *
+     * @param request   用于验证签名的请求
+     * @param secretKey 签名秘钥
+     * @param sign      待验证的签名
+     * @return 签名验证是否通过
+     */
+    verify: (request: ApiSignatureRequest, secretKey: string, sign: string) => boolean;
 }
 
 interface ApiSecretAccount {
@@ -72,6 +90,7 @@ declare class ApiRequestSinger {
     private readonly options;
     constructor(secretAccount: ApiSecretAccount, apiSigner: ApiSigner, options: ApiRequestSingerOptions);
     static hmacSha256: (secretAccount: ApiSecretAccount, options?: ApiRequestSingerOptions) => ApiRequestSinger;
+    static sha256WithRsa: (secretAccount: ApiSecretAccount, options?: ApiRequestSingerOptions) => ApiRequestSinger;
     /**
      * 签名请求
      * @param request
@@ -80,4 +99,4 @@ declare class ApiRequestSinger {
     sign: (request: Omit<ApiSignatureRequest, "nonce" | "timestamp">) => ApiRequestSignResult;
 }
 
-export { ApiRequestSinger, ApiRequestSingerOptions, ApiSecretAccount, ApiSignatureRequest };
+export { ApiRequestSignResult, ApiRequestSinger, ApiRequestSingerOptions, ApiSecretAccount, ApiSignatureRequest, ApiSigner };

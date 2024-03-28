@@ -1,7 +1,7 @@
 {
   "name": "wind-http",
   "version": "1.0.0",
-  "description": "typescript htt client",
+  "description": "typescript http client",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
@@ -45,6 +45,7 @@
   },
   "dependencies": {
     "wind-common-utils": "^1.0.0",
+    "wind-api-signature": "^1.0.0",
     "lodash": "^4.17.15",
     "url-parse": "^1.5.10"
   }

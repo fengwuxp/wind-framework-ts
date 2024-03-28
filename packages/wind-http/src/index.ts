@@ -49,6 +49,7 @@ export {default as HttpResponseEventPublisherInterceptor} from "./event/HttpResp
 export {default as SimpleHttpResponseEventListener} from "./event/SimpleHttpResponseEventListener";
 export {default as SimpleHttpResponseEventPublisher} from "./event/SimpleHttpResponseEventPublisher";
 
+export {default as ApiSignatureRequestInterceptor} from "./interceptor/ApiSignatureRequestInterceptor";
 export {
     default as AuthenticationClientHttpRequestInterceptor
 } from "./interceptor/AuthenticationClientHttpRequestInterceptor";

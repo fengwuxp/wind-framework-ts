@@ -1,6 +1,6 @@
 {
   "name": "wind-common-utils",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "common utils",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
@@ -13,7 +13,11 @@
     "url": "https://github.com/fengwuxp/wind-framework-ts/issues"
   },
   "homepage": "https://github.com/fengwuxp/wind-framework-ts#readme",
-  "main": "index.ts",
+  "files": [
+    "lib",
+    "es",
+    "types"
+  ],
   "author": "wuxp",
   "license": "ISC",
   "scripts": {
