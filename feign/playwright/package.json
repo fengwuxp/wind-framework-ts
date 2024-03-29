@@ -1,6 +1,6 @@
 {
   "name": "wind-http-playwright",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "playwright http client adapt",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"

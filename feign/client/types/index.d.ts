@@ -318,6 +318,75 @@ interface FeignHttpFunctionBuilder {
  */
 declare const feignHttpFunctionBuilder: (options: FeignClientOptions<FeignClientConfiguration>) => FeignHttpFunctionBuilder;
 
+declare enum QueryType {
+    /**
+     * 查询总数
+     */
+    COUNT_TOTAL = "COUNT_TOTAL",
+    /**
+     * 查询结果集
+     */
+    QUERY_RESET = "QUERY_RESET",
+    /**
+     * 查询总数和结果集
+     */
+    QUERY_BOTH = "QUERY_RESET"
+}
+declare enum QueryOrderType {
+    /**
+     * 升序
+     */
+    ASC = "ASC",
+    DESC = "DESC"
+}
+/**
+ * 默认的排序字段名称
+ */
+declare enum DefaultOrderField {
+    /**
+     * 创建时间
+     */
+    GMT_CREATE = "GMT_CREATE",
+    /**
+     * 更新时间
+     */
+    GMT_MODIFIED = "GMT_MODIFIED",
+    /**
+     * 排序
+     */
+    ORDER_INDEX = "ORDER_INDEX"
+}
+interface AbstractPageQuery<F = DefaultOrderField> {
+    queryPage?: number;
+    querySize?: number;
+    queryType?: QueryType;
+    /**
+     * 排序字段
+     */
+    orderFields?: F[];
+    /**
+     * 排序类型
+     */
+    orderTypes?: QueryOrderType[];
+}
+/**
+ * 分页对象
+ */
+interface Pagination<T> {
+    total: number;
+    records: T[];
+    queryPage: number;
+    querySize: number;
+    queryType: QueryType;
+}
+interface ApiResponse<T> {
+    data?: T;
+    success: boolean;
+    errorCode: string;
+    errorMessage?: string;
+    traceId: string;
+}
+
 /**
  * 简单的请求头解析者
  * 通过服务接口实例和服务方法名称以及注解的配置生成请求头
@@ -365,4 +434,4 @@ declare class ClientRequestDataValidatorHolder {
  */
 declare const FEIGN_CLINE_META_KEY = "FEIGN";
 
-export { AsyncClientRequestDataValidator, BaseRequestMappingOptions, ClientRequestDataValidator, ClientRequestDataValidatorHolder, DefaultHttpFeignClientExecutor, DeleteMapping, FEIGN_CLINE_META_KEY, Feign, FeignClient, FeignClientConfiguration, FeignClientConfigurer, FeignClientExecutor, FeignClientExecutorFactory, FeignClientMethodConfig, FeignClientOptions, FeignClientType, FeignConfigurationConstructor, registry as FeignConfigurationRegistry, FeignHttpClientFunction, FeignHttpClientPromiseFunction, FeignHttpFunctionBuilder, FeignProxyClient, FeignRequestOptions, FeignRetry, GenerateAnnotationMethodConfig, GetMapping, Mapping, MappingHeaderType, MappingHeaders, PatchMapping, PostMapping, PutMapping, RequestHeaderResolver, RequestMapping, RequestURLResolver, ValidateInvokeOptions, ValidateSchema, ValidatorDescriptor, defaultFeignClientBuilder, feignHttpFunctionBuilder, generateFeignClientAnnotation, generateMapping, registerAnnotationMetadata, restfulRequestURLResolver, simpleRequestHeaderResolver, simpleRequestURLResolver };
+export { AbstractPageQuery, ApiResponse, AsyncClientRequestDataValidator, BaseRequestMappingOptions, ClientRequestDataValidator, ClientRequestDataValidatorHolder, DefaultHttpFeignClientExecutor, DefaultOrderField, DeleteMapping, FEIGN_CLINE_META_KEY, Feign, FeignClient, FeignClientConfiguration, FeignClientConfigurer, FeignClientExecutor, FeignClientExecutorFactory, FeignClientMethodConfig, FeignClientOptions, FeignClientType, FeignConfigurationConstructor, registry as FeignConfigurationRegistry, FeignHttpClientFunction, FeignHttpClientPromiseFunction, FeignHttpFunctionBuilder, FeignProxyClient, FeignRequestOptions, FeignRetry, GenerateAnnotationMethodConfig, GetMapping, Mapping, MappingHeaderType, MappingHeaders, Pagination, PatchMapping, PostMapping, PutMapping, QueryOrderType, QueryType, RequestHeaderResolver, RequestMapping, RequestURLResolver, ValidateInvokeOptions, ValidateSchema, ValidatorDescriptor, defaultFeignClientBuilder, feignHttpFunctionBuilder, generateFeignClientAnnotation, generateMapping, registerAnnotationMetadata, restfulRequestURLResolver, simpleRequestHeaderResolver, simpleRequestURLResolver };

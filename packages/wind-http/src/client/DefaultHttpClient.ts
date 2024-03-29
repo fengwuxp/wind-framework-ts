@@ -14,14 +14,11 @@ class InterceptingRequestExecution {
 
     private readonly interceptors: ClientHttpRequestInterceptor[];
 
-    private readonly defaultProduce: HttpMediaType;
-
     // 已执行拦截器的索引位置
     private pos: number = 0;
 
-    constructor(httpAdapter: HttpAdapter, interceptors?: ClientHttpRequestInterceptor[], defaultProduce?: HttpMediaType) {
+    constructor(httpAdapter: HttpAdapter, interceptors?: ClientHttpRequestInterceptor[]) {
         this.httpAdapter = httpAdapter;
-        this.defaultProduce = defaultProduce;
         this.interceptors = interceptors || [];
     }
 
@@ -41,25 +38,12 @@ class InterceptingRequestExecution {
             }
         } else {
             if (supportRequestBody(request.method)) {
-                const contentType = this.resolveContentType(request);
+                const contentType = request.headers[CONTENT_TYPE_HEAD_NAME];
                 request.body = serializeRequestBody(request.body, contentType, false);
             }
             // send request
             return this.httpAdapter.send(request, context);
         }
-    }
-
-    private resolveContentType = (request: HttpRequest): HttpMediaType => {
-        let headers = request.headers;
-        let contentType = this.defaultProduce;
-        if (headers == null) {
-            headers = {};
-            request.headers = headers;
-        } else {
-            contentType = headers[CONTENT_TYPE_HEAD_NAME] as HttpMediaType || contentType;
-        }
-        headers[CONTENT_TYPE_HEAD_NAME] = contentType;
-        return contentType;
     }
 
 }
@@ -75,15 +59,18 @@ export default class DefaultHttpClient<T extends HttpRequest = HttpRequest> exte
 
     private readonly requestExecution: InterceptingRequestExecution;
 
+    private readonly defaultProduce: HttpMediaType;
+
     /**
      * In order to support different js runtime environments, the following parameters need to be provided
      * @param httpAdapter           Request adapters for different platforms
      * @param interceptors
      * @param defaultProduce
      */
-    constructor(httpAdapter: HttpAdapter, interceptors?: ClientHttpRequestInterceptor[], defaultProduce?: HttpMediaType) {
+    constructor(httpAdapter: HttpAdapter, interceptors?: ClientHttpRequestInterceptor[], defaultProduce: HttpMediaType = HttpMediaType.APPLICATION_JSON) {
         super();
-        this.requestExecution = new InterceptingRequestExecution(httpAdapter, interceptors, defaultProduce);
+        this.requestExecution = new InterceptingRequestExecution(httpAdapter, interceptors);
+        this.defaultProduce = defaultProduce;
     }
 
     /**
@@ -92,11 +79,15 @@ export default class DefaultHttpClient<T extends HttpRequest = HttpRequest> exte
      * @param context
      */
     send = (request: T, context: HttpRequestContextAttributes = {}): Promise<HttpResponse> => {
-        if (DefaultHttpClient.LOG.isDebugEnabled()) {
-            DefaultHttpClient.LOG.debug("send http request, request = {}, context = {}", request, context);
-        }
         if (request.headers == null) {
             request.headers = {};
+        }
+        if (supportRequestBody(request.method) && request.headers[CONTENT_TYPE_HEAD_NAME] == null) {
+            // fill default content type
+            request.headers[CONTENT_TYPE_HEAD_NAME] = this.defaultProduce;
+        }
+        if (DefaultHttpClient.LOG.isDebugEnabled()) {
+            DefaultHttpClient.LOG.debug("send http request, request = {}, context = {}", request, context);
         }
         return this.requestExecution.execute(request, context);
     }

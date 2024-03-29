@@ -95,7 +95,6 @@ export function generateMapping<T extends BaseRequestMappingOptions>(method?: Ma
 
             //通过注解生成feign的代理配置
             const requestMapping: RequestMappingOptions = {
-
                 method,
                 ...(options as any)
             };

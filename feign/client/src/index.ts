@@ -30,6 +30,10 @@ export {FeignClientExecutor, FeignClientExecutorFactory} from "./executor/FeignC
 export {FeignHttpClientFunction, FeignHttpClientPromiseFunction} from "./functions/FeignHttpClientFunction";
 export {FeignHttpFunctionBuilder, feignHttpFunctionBuilder} from "./functions/FeignHttpFunctionBuilder";
 
+export {
+    QueryType, QueryOrderType, AbstractPageQuery, Pagination, ApiResponse, DefaultOrderField
+} from "./model/WindApiModelDefinition"
+
 export {RequestHeaderResolver} from "./resolve/header/RequestHeaderResolver";
 export {simpleRequestHeaderResolver} from "./resolve/header/SimpleRequestHeaderResolver";
 export {RequestURLResolver} from "./resolve/url/RequestURLResolver";

@@ -19,11 +19,12 @@ export default class PlaywrightHttpAdapter implements HttpAdapter {
 
     send = (request: HttpRequest, context: HttpRequestContextAttributes): Promise<HttpResponse> => {
         const {apiRequestContext} = this;
-        return apiRequestContext.get(request.url, {
+        return apiRequestContext[request.method.toLowerCase()](request.url, {
             data: request.body,
             headers: request.headers as any,
             timeout: context.timeout
-        }).then(this.convertResponse);
+        }).then(this.convertResponse)
+            .catch(this.convertResponse);
     }
 
     private convertResponse = (response: APIResponse): Promise<HttpResponse> => {

@@ -442,6 +442,7 @@ type ClientHttpRequestInterceptor<T extends HttpRequest = HttpRequest> = ClientH
 declare class DefaultHttpClient<T extends HttpRequest = HttpRequest> extends AbstractHttpClient<T> {
     private static LOG;
     private readonly requestExecution;
+    private readonly defaultProduce;
     /**
      * In order to support different js runtime environments, the following parameters need to be provided
      * @param httpAdapter           Request adapters for different platforms

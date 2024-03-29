@@ -23,6 +23,7 @@ const getConfig = (isProd) => {
         // https://rollupjs.org/guide/en#external-e-external
         external: [
             "core-js",
+            "babel-plugin-polyfill-corejs3",
             "@babel/runtime-corejs3",
             "log4js",
             "@abraham/reflection",
