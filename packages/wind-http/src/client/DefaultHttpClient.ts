@@ -57,19 +57,22 @@ export default class DefaultHttpClient<T extends HttpRequest = HttpRequest> exte
 
     private static LOG = DefaultHttpLo4jFactory.getLogger(DefaultHttpClient.name);
 
-    private readonly requestExecution: InterceptingRequestExecution;
+    private readonly httpAdapter: HttpAdapter;
+
+    private readonly interceptors?: ClientHttpRequestInterceptor[];
 
     private readonly defaultProduce: HttpMediaType;
 
     /**
      * In order to support different js runtime environments, the following parameters need to be provided
-     * @param httpAdapter           Request adapters for different platforms
-     * @param interceptors
-     * @param defaultProduce
+     * @param httpAdapter     Request adapters for different platforms
+     * @param interceptors    Intercept the given request, and return a response
+     * @param defaultProduce  default request Body Content-Type
      */
     constructor(httpAdapter: HttpAdapter, interceptors?: ClientHttpRequestInterceptor[], defaultProduce: HttpMediaType = HttpMediaType.APPLICATION_JSON) {
         super();
-        this.requestExecution = new InterceptingRequestExecution(httpAdapter, interceptors);
+        this.httpAdapter =httpAdapter;
+        this.interceptors =interceptors;
         this.defaultProduce = defaultProduce;
     }
 
@@ -89,7 +92,7 @@ export default class DefaultHttpClient<T extends HttpRequest = HttpRequest> exte
         if (DefaultHttpClient.LOG.isDebugEnabled()) {
             DefaultHttpClient.LOG.debug("send http request, request = {}, context = {}", request, context);
         }
-        return this.requestExecution.execute(request, context);
+        return new InterceptingRequestExecution(this.httpAdapter, this.interceptors).execute(request, context);
     }
 
 }

@@ -36,7 +36,9 @@ class _InnerFeignHttpFunctionBuilder implements FeignHttpFunctionBuilder {
 
     constructor(proxyClass, options: FeignClientOptions<FeignClientConfiguration>) {
         this.proxyClass = proxyClass;
-        const FeignHttpClientConstructor: { new(...args: any[]): FeignProxyClient<FeignClientConfiguration> } = Feign(options)(proxyClass);
+        const FeignHttpClientConstructor: {
+            new(...args: any[]): FeignProxyClient<FeignClientConfiguration>
+        } = Feign(options)(proxyClass);
         this.feignProxyHttpClient = new FeignHttpClientConstructor();
     }
 
@@ -89,8 +91,9 @@ class _InnerFeignHttpFunctionBuilder implements FeignHttpFunctionBuilder {
 
     private defineHttpRequestMethod = (requestMapping: RequestMappingOptions): string => {
         const methodName = `${requestMapping.method}_${requestMapping.value ?? ""}_${this.methodIndex++}`;
-        // 在类原型上定义方法
-        RequestMapping(requestMapping)(this.proxyClass.prototype, methodName)
+        if (this.proxyClass.prototype[methodName] == null) { // 在类原型上定义方法
+            RequestMapping(requestMapping)(this.proxyClass.prototype, methodName)
+        }
         return methodName;
     }
 
