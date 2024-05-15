@@ -58,6 +58,11 @@ export interface BaseRequestMappingOptions {
      */
     produces?: string[];
 
+    /**
+     * 请求体参数名称列表
+     * 在提交数据时，会根据这个参数来确定提交的数据集
+     */
+    bodyArgs?: string[];
 }
 
 

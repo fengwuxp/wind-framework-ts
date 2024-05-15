@@ -3,9 +3,9 @@ import {
     Feign,
     FeignRequestOptions,
     FeignRetry,
+    GetMapping,
     PostMapping,
     RequestMapping,
-    GetMapping,
     ValidateSchema
 } from "../src";
 import {HttpMediaType, HttpMethod} from "wind-http";
@@ -64,9 +64,17 @@ export default class ExampleFeignClient {
 
     @DeleteMapping({value: "delete_member/{memberId}", produces: [HttpMediaType.APPLICATION_JSON_UTF8]})
     deleteMember: (
-        request: {
-            memberId: number,
-        },
+        request: { memberId: number },
+        options?: FeignRequestOptions) => Promise<number>;
+
+    @PostMapping({
+        value: "test-example",
+        headers: {myHeader: "tk_{memberId}"},
+        produces: [HttpMediaType.APPLICATION_JSON_UTF8],
+        bodyArgs: ["tags"]
+    })
+    testExample2: (
+        request: { memberId: number, tags: string[] },
         options?: FeignRequestOptions) => Promise<number>;
 }
 

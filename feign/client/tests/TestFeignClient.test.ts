@@ -171,5 +171,18 @@ describe("test feign client", () => {
         }
     });
 
+    test("test exampl 2", async () => {
+        sleep(200).then(() => {
+            logger.info("异步设置设置配置")
+            FeignConfigurationRegistry.setFeignConfiguration(FEIGN_HTTP, DEFAULT_SERVICE_NAME, mockFeignConfiguration);
+        })
+        try {
+            const result = await exampleFeignClient.testExample2({memberId: 1, tags: ["1", "tags"]});
+            expect(result).toBeNull();
+        } catch (error) {
+            expect(error).toEqual(NOT_FOUND_ERROR);
+        }
+    });
+
 });
 

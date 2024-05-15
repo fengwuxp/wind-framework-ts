@@ -108,11 +108,21 @@ export default class DefaultHttpFeignClientExecutor<T extends FeignProxyClient =
         const requestSupportRequestBody = supportRequestBody(requestMapping.method);
         if (requestSupportRequestBody) {
             result.body = this.resolveRequestBody(originalParameter, options.filterNoneValue);
+
+
         } else {
             result.uriVariables = this.resolveQueryPrams(originalParameter, requestMapping.params ?? {});
         }
 
         result.headers = this.resolverRequestHeaders(result, methodName);
+        if (requestMapping.bodyArgs && requestMapping.bodyArgs.length > 0) {
+            // 按照指定的名称提交  body 参数
+            const reqeustBody = {};
+            for (const name of requestMapping.bodyArgs) {
+                reqeustBody[name] = result.body[name];
+            }
+            result.body = reqeustBody;
+        }
         return result;
     }
 
