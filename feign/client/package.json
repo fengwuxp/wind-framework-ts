@@ -1,6 +1,6 @@
 {
   "name": "feign-client",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "typescript feign client",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"

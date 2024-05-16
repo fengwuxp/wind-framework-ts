@@ -117,11 +117,10 @@ export default class DefaultHttpFeignClientExecutor<T extends FeignProxyClient =
         result.headers = this.resolverRequestHeaders(result, methodName);
         if (requestMapping.bodyArgNames && requestMapping.bodyArgNames.length > 0) {
             // 按照指定的名称提交  body 参数
-            const reqeustBody = {};
-            for (const name of requestMapping.bodyArgNames) {
-                reqeustBody[name] = result.body[name];
+            if (requestMapping.bodyArgNames.length > 1) {
+                throw new Error("bodyArgNames only support one body argument");
             }
-            result.body = reqeustBody;
+            result.body = result.body[requestMapping.bodyArgNames[0]];
         }
         return result;
     }

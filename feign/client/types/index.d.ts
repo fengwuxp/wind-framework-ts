@@ -42,6 +42,11 @@ interface BaseRequestMappingOptions {
      * 默认 MediaType.JSON_UTF8
      */
     produces?: string[];
+    /**
+     * 请求体参数名称列表
+     * 在提交数据时，会根据这个参数来确定提交的数据集
+     */
+    bodyArgNames?: string[];
 }
 interface RequestMappingOptions extends BaseRequestMappingOptions {
     /**
