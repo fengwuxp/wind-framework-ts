@@ -71,7 +71,7 @@ export default class ExampleFeignClient {
         value: "test-example",
         headers: {myHeader: "tk_{memberId}"},
         produces: [HttpMediaType.APPLICATION_JSON_UTF8],
-        bodyArgs: ["tags"]
+        bodyArgNames: ["tags"]
     })
     testExample2: (
         request: { memberId: number, tags: string[] },
