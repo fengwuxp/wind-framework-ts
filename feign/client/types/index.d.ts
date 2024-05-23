@@ -43,10 +43,15 @@ interface BaseRequestMappingOptions {
      */
     produces?: string[];
     /**
-     * 请求体参数名称列表
+     * 查询参数名称列表
      * 在提交数据时，会根据这个参数来确定提交的数据集
      */
-    bodyArgNames?: string[];
+    queryArgNames?: string[];
+    /**
+     * 请求体参数名称
+     * 在提交数据时，会根据这个参数来确定提交的数据集
+     */
+    bodyArgName?: string;
 }
 interface RequestMappingOptions extends BaseRequestMappingOptions {
     /**

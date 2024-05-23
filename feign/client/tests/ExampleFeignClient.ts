@@ -68,13 +68,28 @@ export default class ExampleFeignClient {
         options?: FeignRequestOptions) => Promise<number>;
 
     @PostMapping({
-        value: "test-example",
+        value: "test-example/{id}",
         headers: {myHeader: "tk_{memberId}"},
         produces: [HttpMediaType.APPLICATION_JSON_UTF8],
-        bodyArgNames: ["tags"]
+        bodyArgName: "tags",
+        queryArgNames: ['type', 'age', "name"]
     })
     testExample2: (
-        request: { memberId: number, tags: string[] },
+        request: { memberId: number; tags: string[]; type: string; age: number; id: number; name: string },
+        options?: FeignRequestOptions) => Promise<number>;
+
+    @GetMapping({
+        value: "test-example2/{id}",
+        headers: {myHeader: "tk_{memberId}"},
+        produces: [HttpMediaType.APPLICATION_JSON_UTF8],
+        queryArgNames: ["query"]
+    })
+    testExample3: (
+        request: {
+            memberId: number; query: {
+                age: number; id: number; name: string
+            }
+        },
         options?: FeignRequestOptions) => Promise<number>;
 }
 

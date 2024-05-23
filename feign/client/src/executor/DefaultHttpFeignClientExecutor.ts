@@ -108,20 +108,34 @@ export default class DefaultHttpFeignClientExecutor<T extends FeignProxyClient =
         const requestSupportRequestBody = supportRequestBody(requestMapping.method);
         if (requestSupportRequestBody) {
             result.body = this.resolveRequestBody(originalParameter, options.filterNoneValue);
-
-
-        } else {
-            result.uriVariables = this.resolveQueryPrams(originalParameter, requestMapping.params ?? {});
         }
 
         result.headers = this.resolverRequestHeaders(result, methodName);
-        if (requestMapping.bodyArgNames && requestMapping.bodyArgNames.length > 0) {
+        if (requestMapping.bodyArgName) {
             // 按照指定的名称提交  body 参数
-            if (requestMapping.bodyArgNames.length > 1) {
-                throw new Error("bodyArgNames only support one body argument");
-            }
-            result.body = result.body[requestMapping.bodyArgNames[0]];
+            result.body = result.body[requestMapping.bodyArgName];
         }
+
+        const requiredQuery = requestMapping.queryArgNames && requestMapping.queryArgNames.length > 0;
+        if (!requestSupportRequestBody || requiredQuery) {
+            // 按照指定的名称提交 url 参数
+            if (requiredQuery) {
+                const queryArgNames = requestMapping.queryArgNames;
+                if (queryArgNames.length == 1 && typeof originalParameter[queryArgNames[0]] === 'object') {
+                    // 仅存在一个对象参数
+                    result.uriVariables = originalParameter[queryArgNames[0]]
+                } else {
+                    const uriVariables = {};
+                    queryArgNames.forEach(name => {
+                        uriVariables[name] = originalParameter[name]
+                    });
+                    result.uriVariables = this.resolveQueryPrams(uriVariables, requestMapping.params ?? {});
+                }
+            } else {
+                result.uriVariables = this.resolveQueryPrams(originalParameter, requestMapping.params ?? {});
+            }
+        }
+
         return result;
     }
 

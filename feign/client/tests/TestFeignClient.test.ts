@@ -171,13 +171,40 @@ describe("test feign client", () => {
         }
     });
 
-    test("test exampl 2", async () => {
+    test("test example 2", async () => {
         sleep(200).then(() => {
             logger.info("异步设置设置配置")
             FeignConfigurationRegistry.setFeignConfiguration(FEIGN_HTTP, DEFAULT_SERVICE_NAME, mockFeignConfiguration);
         })
         try {
-            const result = await exampleFeignClient.testExample2({memberId: 1, tags: ["1", "tags"]});
+            const result = await exampleFeignClient.testExample2({
+                id: 1,
+                memberId: 12,
+                tags: ["1", "tags"],
+                type: "example",
+                age: 9999,
+                name: "张三"
+            });
+            expect(result).toBeNull();
+        } catch (error) {
+            expect(error).toEqual(NOT_FOUND_ERROR);
+        }
+    });
+
+    test("test example 3", async () => {
+        sleep(200).then(() => {
+            logger.info("异步设置设置配置")
+            FeignConfigurationRegistry.setFeignConfiguration(FEIGN_HTTP, DEFAULT_SERVICE_NAME, mockFeignConfiguration);
+        })
+        try {
+            const result = await exampleFeignClient.testExample3({
+                memberId: 12,
+                query:{
+                    id: 1,
+                    age: 9999,
+                    name: "张三"
+                }
+            });
             expect(result).toBeNull();
         } catch (error) {
             expect(error).toEqual(NOT_FOUND_ERROR);
