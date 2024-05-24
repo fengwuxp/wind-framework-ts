@@ -99,4 +99,4 @@ declare class ApiRequestSinger {
     sign: (request: Omit<ApiSignatureRequest, "nonce" | "timestamp">) => ApiRequestSignResult;
 }
 
-export { ApiRequestSignResult, ApiRequestSinger, ApiRequestSingerOptions, ApiSecretAccount, ApiSignatureRequest, ApiSigner };
+export { type ApiRequestSignResult, ApiRequestSinger, type ApiRequestSingerOptions, type ApiSecretAccount, type ApiSignatureRequest, type ApiSigner };

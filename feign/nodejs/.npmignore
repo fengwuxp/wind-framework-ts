@@ -5,6 +5,7 @@ tsconfig.test.json
 tsconfig.lib.json
 tsconfig.json
 jest.config.js
-test
+tests
 babel.config.js
-rollup.config.js
+rollup.config.ts
+rollup.esnext.config.ts

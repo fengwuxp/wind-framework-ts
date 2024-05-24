@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "moduleResolution": "node",
+    "resolveJsonModule": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "emitDecoratorMetadata": true,
@@ -25,8 +26,11 @@
   },
   "include": [
     "./src/**/*",
-    "./test/**/*",
+    "./rollup.config.ts",
+    "./rollup.esnext.config.ts",
+    "./tests/**/*",
     "./types/**/*.d.ts",
+    "../../global.d.ts",
     "node_modules/**/*/types/**/*.d.ts"
   ],
   "exclude": [

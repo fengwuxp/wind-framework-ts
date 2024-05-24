@@ -45,7 +45,7 @@ declare class BrowserHttpAdapter implements HttpAdapter<BrowserHttpRequest> {
     private readonly consumes;
     /**
      *
-     * @param timeout  default 5000ms
+     * @param timeout  default 1min
      * @param defaultOptions
      * @param consumes  default 'application/json;charset=UTF-8'
      */
@@ -86,4 +86,4 @@ declare class BrowserNetworkStatusListener implements NetworkStatusListener {
     private getBrowserNetworkStatus;
 }
 
-export { BrowserHttpAdapter, BrowserHttpRequest, BrowserNetworkStatusListener };
+export { BrowserHttpAdapter, type BrowserHttpRequest, BrowserNetworkStatusListener };

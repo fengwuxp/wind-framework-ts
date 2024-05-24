@@ -1,6 +1,6 @@
 {
   "name": "wind-http-node",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "node http client adapt",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
@@ -15,7 +15,6 @@
   "homepage": "https://github.com/fengwuxp/wind-framework-ts#readme",
   "main": "lib/index.js",
   "module": "es/index.js",
-  "esnext": "esnext/index.js",
   "typings": "types/index.d.ts",
   "files": [
     "lib",
@@ -28,9 +27,9 @@
     "install:dependencies": "yarn install",
     "test": "jest --config ./jest.config.js --verbose=false",
     "build:ts": "rm -rf ./types && tsc -p ./tsconfig.lib.json --emitDeclarationOnly",
-    "build:lib": "npm run test && rm -rf ./dist && rm -rf ./es  && npm run build:ts && rollup -c && rm -rf ./types-temp",
+    "build:lib": "npm run test && rm -rf ./dist && rm -rf ./es  && npm run build:ts && rollup -c rollup.config.ts --configPlugin @rollup/plugin-typescript && rm -rf ./types-temp",
     "npm:publish": "npm publish",
-    "deploy:lib": "npm run build:lib && npm run build:esnext && npm run npm:publish"
+    "deploy:lib": "npm run build:lib && npm run npm:publish"
   },
   "keywords": [
     "node fetch",
@@ -38,8 +37,10 @@
     "typescript"
   ],
   "dependencies": {
-    "wind-http": "^1.0.0",
-    "node-fetch": "^3.3.2"
+    "wind-http": "^1.0.0"
+  },
+  "devDependencies": {
+    "node-fetch": "2.6.7"
   },
   "gitHead": "02618ca02969b87cc659c7aeb27646e7f26c3504"
 }

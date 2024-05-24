@@ -1,5 +1,5 @@
 import { HttpRequest, HttpAdapter, HttpMediaType, HttpRequestContextAttributes, HttpResponse } from 'wind-http';
-import { RequestInit } from 'node-fetch';
+import { ReferrerPolicy, RequestRedirect, RequestInit } from 'node-fetch';
 
 /**
  *  node js http request
@@ -14,29 +14,13 @@ interface NodeHttpRequest extends HttpRequest {
      */
     referrerPolicy?: ReferrerPolicy;
     /**
-     * 请求的模式，主要用于跨域设置，cors, no-cors, same-origin
-     */
-    mode?: RequestMode;
-    /**
-     * 是否发送Cookie
-     */
-    credentials?: RequestCredentials;
-    /**
      * 收到重定向请求之后的操作，follow, error, manual
      */
     redirect?: RequestRedirect;
     /**
-     * 缓存模式
+     * Returns the signal associated with request, which is an AbortSignal object indicating whether or not request has been aborted, and its abort event handler.
      */
-    cache?: RequestCache;
-    /**
-     * 完整性校验
-     */
-    integrity?: string;
-    /**
-     * 长连接
-     */
-    keepalive?: boolean;
+    signal: AbortSignal;
 }
 
 /**
@@ -77,4 +61,4 @@ declare class NodeHttpAdapter implements HttpAdapter<NodeHttpRequest> {
     private hasTransferEncoding;
 }
 
-export { NodeHttpAdapter, NodeHttpRequest };
+export { NodeHttpAdapter, type NodeHttpRequest };

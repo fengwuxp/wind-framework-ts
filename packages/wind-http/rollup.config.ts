@@ -1,17 +1,17 @@
 import * as os from 'os';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
-import babel from '@rollup/plugin-babel';
+import {babel} from '@rollup/plugin-babel';
 import {terser} from 'rollup-plugin-terser';
 import json from '@rollup/plugin-json';
 import typescript from 'rollup-plugin-typescript2';
 import filesize from "rollup-plugin-filesize";
 import includePaths from "rollup-plugin-includepaths";
 import analyze from "rollup-plugin-analyzer";
-import dts from "rollup-plugin-dts";
-
-import pkg from './package.json';
+import {dts} from "rollup-plugin-dts";
+import pkg from './package.json' assert {type: 'json'};
 import {DEFAULT_EXTENSIONS} from "@babel/core";
+
 
 const cpuNums = os.cpus().length;
 
@@ -23,11 +23,20 @@ const getConfig = (isProd) => {
         // https://rollupjs.org/guide/en#external-e-external
         external: [
             "core-js",
+            "log4js",
             "@babel/runtime-corejs3",
-            "@react-native-community/netinfo",
-            "wind-http",
+            "@abraham/reflection",
+            "async-validator",
+            "xregexp",
+            "xregexp-quotemeta",
+            "querystring",
+            "lodash/memoize",
+            "wind-proxy",
+            "wind-api-signature",
+            "wind-common-utils",
             "wind-common-utils/lib/date/DateFormatUtils",
             "wind-common-utils/lib/match/SimplePathMatcher",
+            "wind-common-utils/lib/http/HttpMediaType",
             "wind-common-utils/lib/string/StringUtils"
         ],
         output: [
@@ -37,7 +46,8 @@ const getConfig = (isProd) => {
                 compact: true,
                 extend: false,
                 sourcemap: isProd,
-                strictDeprecations: false
+                strictDeprecations: false,
+                interop: "auto",
             },
             {
                 file: isProd ? pkg.module.replace(".js", ".min.js") : pkg.module,
@@ -45,7 +55,8 @@ const getConfig = (isProd) => {
                 compact: true,
                 extend: false,
                 sourcemap: isProd,
-                strictDeprecations: false
+                strictDeprecations: false,
+                interop: "auto",
             }
         ],
         plugins: [
@@ -83,10 +94,6 @@ const getConfig = (isProd) => {
             }),
             //压缩代码
             isProd && terser({
-                output: {
-                    comments: false,
-                    source_map: true,
-                },
                 keep_classnames: false,
                 ie8: false,
                 ecma: 2015,
@@ -105,7 +112,7 @@ export default [
     getConfig(false),
     getConfig(true),
     {
-        input: "./types-temp/index.d.ts",
+        input: "./types-temp/src/index.d.ts",
         output: {
             file: "./types/index.d.ts",
             format: "es"

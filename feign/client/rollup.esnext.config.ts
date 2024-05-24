@@ -1,16 +1,14 @@
 import * as os from 'os';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
-import babel from '@rollup/plugin-babel';
 import {terser} from 'rollup-plugin-terser';
 import json from '@rollup/plugin-json';
 import typescript from 'rollup-plugin-typescript2';
 import filesize from "rollup-plugin-filesize";
 import includePaths from "rollup-plugin-includepaths";
 import analyze from "rollup-plugin-analyzer";
-import dts from "rollup-plugin-dts";
 
-import pkg from './package.json';
+import pkg from './package.json' assert {type: 'json'};
 import {DEFAULT_EXTENSIONS} from "@babel/core";
 
 const cpuNums = os.cpus().length;
@@ -23,8 +21,16 @@ const getConfig = (isProd) => {
         // https://rollupjs.org/guide/en#external-e-external
         external: [
             "core-js",
+            "log4js",
             "@babel/runtime-corejs3",
-            "playwright-core",
+            "@abraham/reflection",
+            "async-validator",
+            "xregexp",
+            "xregexp-quotemeta",
+            "querystring",
+            "lodash/memoize",
+            "wind-proxy",
+            "wind-common-utils",
             "wind-http",
             "wind-common-utils/lib/date/DateFormatUtils",
             "wind-common-utils/lib/match/SimplePathMatcher",
@@ -32,20 +38,13 @@ const getConfig = (isProd) => {
         ],
         output: [
             {
-                file: isProd ? pkg.main.replace(".js", ".min.js") : pkg.main,
-                format: 'commonjs',
-                compact: true,
-                extend: false,
-                sourcemap: isProd,
-                strictDeprecations: false
-            },
-            {
-                file: isProd ? pkg.module.replace(".js", ".min.js") : pkg.module,
+                file: isProd ? pkg.esnext.replace(".js", ".min.js") : pkg.esnext,
                 format: 'esm',
                 compact: true,
                 extend: false,
                 sourcemap: isProd,
-                strictDeprecations: false
+                strictDeprecations: false,
+                interop: "auto",
             }
         ],
         plugins: [
@@ -53,7 +52,7 @@ const getConfig = (isProd) => {
                 tsconfig: "./tsconfig.lib.json",
                 tsconfigOverride: {
                     compilerOptions: {
-                        module: "esnext",
+                        target: "esnext",
                         declaration: false
                     }
                 }
@@ -69,11 +68,6 @@ const getConfig = (isProd) => {
                 exclude: [],
                 extensions: [...DEFAULT_EXTENSIONS, ".ts", ".tsx"],
             }),
-            babel({
-                exclude: "node_modules/**",
-                babelHelpers: "runtime",
-                extensions: [...DEFAULT_EXTENSIONS, ".ts", ".tsx"]
-            }),
             analyze({
                 stdout: true,
             }),
@@ -83,13 +77,6 @@ const getConfig = (isProd) => {
             }),
             //压缩代码
             isProd && terser({
-                output: {
-                    comments: false,
-                    source_map: true,
-                },
-                keep_classnames: false,
-                ie8: false,
-                ecma: 2015,
                 numWorkers: cpuNums
             }),
 
@@ -104,13 +91,5 @@ const getConfig = (isProd) => {
 export default [
     getConfig(false),
     getConfig(true),
-    {
-        input: "./types-temp/index.d.ts",
-        output: {
-            file: "./types/index.d.ts",
-            format: "es"
-        },
-        plugins: [dts()],
-    },
 ]
 

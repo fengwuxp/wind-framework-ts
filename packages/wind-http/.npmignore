@@ -7,4 +7,5 @@ tsconfig.json
 jest.config.js
 test
 babel.config.js
-rollup.config.js
+rollup.config.ts
+rollup.esnext.config.ts

@@ -1,4 +1,5 @@
 import { HttpMethod, HttpRequestContextAttributes, HttpRetryOptions, UriVariable, RestOperations } from 'wind-http';
+import * as async_validator from 'async-validator';
 import { RuleItem } from 'async-validator';
 
 type MappingMethod = HttpMethod | string;
@@ -149,7 +150,7 @@ type ValidateSchemaOptions<T> = ValidatorDescriptor<T>;
  * @param options  验证配置
  * @constructor
  */
-declare const ValidateSchema: <O = any, T extends FeignClient = FeignClient>(options: Partial<{ [key in keyof O]: RuleItem; }>) => Function;
+declare const ValidateSchema: <O = any, T extends FeignClient = FeignClient>(options: Partial<{ [key in keyof O]: async_validator.RuleItem; }>) => Function;
 
 /**
  * feign的代理相关配置
@@ -430,13 +431,13 @@ type GenerateAnnotationMethodConfig<T extends FeignClient = FeignClient, O exten
 declare const registerAnnotationMetadata: GenerateAnnotationMethodConfig;
 
 declare class AsyncClientRequestDataValidator implements ClientRequestDataValidator {
-    validate: <T>(requestData: T, descriptor: Partial<{ [key in keyof T]: RuleItem; }>, options?: ValidateInvokeOptions | false) => Promise<T>;
+    validate: <T>(requestData: T, descriptor: Partial<{ [key in keyof T]: async_validator.RuleItem; }>, options?: ValidateInvokeOptions | false) => Promise<T>;
 }
 
 declare class ClientRequestDataValidatorHolder {
     private static clientRequestDataValidator;
     static setClientRequestDataValidator: (clientRequestDataValidator: ClientRequestDataValidator) => void;
-    static validate: <T>(requestData: T, descriptor: Partial<{ [key in keyof T]: RuleItem; }>, options?: ValidateInvokeOptions | false) => Promise<T>;
+    static validate: <T>(requestData: T, descriptor: Partial<{ [key in keyof T]: async_validator.RuleItem; }>, options?: ValidateInvokeOptions | false) => Promise<T>;
 }
 
 /**
@@ -444,4 +445,4 @@ declare class ClientRequestDataValidatorHolder {
  */
 declare const FEIGN_CLINE_META_KEY = "FEIGN";
 
-export { AbstractPageQuery, ApiResponse, AsyncClientRequestDataValidator, BaseRequestMappingOptions, ClientRequestDataValidator, ClientRequestDataValidatorHolder, DefaultHttpFeignClientExecutor, DefaultOrderField, DeleteMapping, FEIGN_CLINE_META_KEY, Feign, FeignClient, FeignClientConfiguration, FeignClientConfigurer, FeignClientExecutor, FeignClientExecutorFactory, FeignClientMethodConfig, FeignClientOptions, FeignClientType, FeignConfigurationConstructor, registry as FeignConfigurationRegistry, FeignHttpClientFunction, FeignHttpClientPromiseFunction, FeignHttpFunctionBuilder, FeignProxyClient, FeignRequestOptions, FeignRetry, GenerateAnnotationMethodConfig, GetMapping, Mapping, MappingHeaderType, MappingHeaders, Pagination, PatchMapping, PostMapping, PutMapping, QueryOrderType, QueryType, RequestHeaderResolver, RequestMapping, RequestURLResolver, ValidateInvokeOptions, ValidateSchema, ValidatorDescriptor, defaultFeignClientBuilder, feignHttpFunctionBuilder, generateFeignClientAnnotation, generateMapping, registerAnnotationMetadata, restfulRequestURLResolver, simpleRequestHeaderResolver, simpleRequestURLResolver };
+export { type AbstractPageQuery, type ApiResponse, AsyncClientRequestDataValidator, type BaseRequestMappingOptions, type ClientRequestDataValidator, ClientRequestDataValidatorHolder, DefaultHttpFeignClientExecutor, DefaultOrderField, DeleteMapping, FEIGN_CLINE_META_KEY, Feign, type FeignClient, type FeignClientConfiguration, type FeignClientConfigurer, type FeignClientExecutor, type FeignClientExecutorFactory, type FeignClientMethodConfig, type FeignClientOptions, type FeignClientType, type FeignConfigurationConstructor, registry as FeignConfigurationRegistry, type FeignHttpClientFunction, type FeignHttpClientPromiseFunction, type FeignHttpFunctionBuilder, type FeignProxyClient, type FeignRequestOptions, FeignRetry, type GenerateAnnotationMethodConfig, GetMapping, type Mapping, type MappingHeaderType, type MappingHeaders, type Pagination, PatchMapping, PostMapping, PutMapping, QueryOrderType, QueryType, type RequestHeaderResolver, RequestMapping, type RequestURLResolver, type ValidateInvokeOptions, ValidateSchema, type ValidatorDescriptor, defaultFeignClientBuilder, feignHttpFunctionBuilder, generateFeignClientAnnotation, generateMapping, registerAnnotationMetadata, restfulRequestURLResolver, simpleRequestHeaderResolver, simpleRequestURLResolver };

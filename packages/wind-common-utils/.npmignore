@@ -1,8 +1,11 @@
 # Created by .ignore support plugin (hsz.mobi)
-tsconfig.json
 .awcache
-jest.config.js
-test
+node_modules
 tsconfig.test.json
-webpack.config.js
-scripts
+tsconfig.lib.json
+tsconfig.json
+jest.config.js
+tests
+babel.config.js
+rollup.config.ts
+rollup.esnext.config.ts

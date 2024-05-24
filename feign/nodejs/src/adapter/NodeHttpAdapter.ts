@@ -143,7 +143,7 @@ export default class NodeHttpAdapter implements HttpAdapter<NodeHttpRequest> {
      */
     private parseResponse = (response: Response): Promise<any> => {
         const {getHeaderByName, consumes} = this;
-        const headers = response.headers;
+        const headers = response.headers as any;
 
         if (response.body == null) {
             // 没有响应 body 为null

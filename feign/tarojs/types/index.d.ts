@@ -1,4 +1,4 @@
-import { HttpRequest, HttpAdapter, HttpResponse, HttpMethod, NetworkStatusListener, NetworkStatus } from 'wind-http';
+import { HttpRequest, HttpAdapter, HttpRequestContextAttributes, HttpResponse, HttpMethod, NetworkStatusListener, NetworkStatus } from 'wind-http';
 
 interface TarojsHttpRequest extends HttpRequest {
     /**
@@ -201,14 +201,14 @@ type TarojsHttpRequester = (request: TarojsHttpRequestOptions) => Promise<Tarojs
  * tarojs http adaptor
  */
 declare class TarojsHttpAdaptor implements HttpAdapter<TarojsHttpRequest> {
-    private readonly fetch;
+    private readonly tarojsHttpFetch;
     private readonly timeout;
     /**
-     * @param fetch tarojs request function
+     * @param tarojsHttpFetch tarojs request function
      * @param timeout  default 30000ms
      */
-    constructor(fetch: TarojsHttpRequester, timeout?: number);
-    send: (req: TarojsHttpRequest) => Promise<HttpResponse>;
+    constructor(tarojsHttpFetch: TarojsHttpRequester, timeout?: number);
+    send: (req: TarojsHttpRequest, context: HttpRequestContextAttributes) => Promise<HttpResponse>;
     private buildRequest;
 }
 
@@ -222,4 +222,4 @@ declare class TarojsNetworkStatusListener implements NetworkStatusListener {
     onChange: (callback: (networkStatus: NetworkStatus) => void) => void;
 }
 
-export { TarojsHttpAdaptor, TarojsHttpRequest, TarojsNetworkStatusListener };
+export { TarojsHttpAdaptor, type TarojsHttpRequest, TarojsNetworkStatusListener };

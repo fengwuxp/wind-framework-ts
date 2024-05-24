@@ -71,4 +71,4 @@ declare class ReactNativeHttpAdapter implements HttpAdapter<ReactNativeHttpReque
     private paresBlob;
 }
 
-export { ReactNativeHttpAdapter, ReactNativeHttpRequest, ReactNativeNetworkStatusListener };
+export { ReactNativeHttpAdapter, type ReactNativeHttpRequest, ReactNativeNetworkStatusListener };

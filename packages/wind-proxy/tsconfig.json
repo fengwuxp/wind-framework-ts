@@ -2,14 +2,15 @@
   "compilerOptions": {
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": false,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "downlevelIteration": true,
     "module": "esnext",
     "target": "es6",
     "sourceMap": false,
     "baseUrl": "./src",
-    "declaration": false,
     "importHelpers": true,
     "types": [
       "node",
@@ -24,8 +25,12 @@
   },
   "include": [
     "./src/**/*",
-    "./test/**/*",
-    "./types/**/*.d.ts"
+    "./rollup.config.ts",
+    "./rollup.esnext.config.ts",
+    "./tests/**/*",
+    "./types/**/*.d.ts",
+    "../../global.d.ts",
+    "node_modules/**/*/types/**/*.d.ts"
   ],
   "exclude": [
     "dist",
