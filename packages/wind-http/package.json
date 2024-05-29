@@ -1,6 +1,6 @@
 {
   "name": "wind-http",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "typescript http client",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"

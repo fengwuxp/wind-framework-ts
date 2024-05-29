@@ -105,12 +105,11 @@ export default class DefaultHttpFeignClientExecutor<T extends FeignProxyClient =
         const result: Partial<RestfulHttpRequest> = {
             method: requestMapping.method
         };
+        result.headers = this.resolverRequestHeaders(originalParameter, methodName);
         const requestSupportRequestBody = supportRequestBody(requestMapping.method);
         if (requestSupportRequestBody) {
             result.body = this.resolveRequestBody(originalParameter, options.filterNoneValue);
         }
-
-        result.headers = this.resolverRequestHeaders(result, methodName);
         if (requestMapping.bodyArgName) {
             // 按照指定的名称提交  body 参数
             result.body = result.body[requestMapping.bodyArgName];
@@ -135,7 +134,6 @@ export default class DefaultHttpFeignClientExecutor<T extends FeignProxyClient =
                 result.uriVariables = this.resolveQueryPrams(originalParameter, requestMapping.params ?? {});
             }
         }
-
         return result;
     }
 
@@ -174,15 +172,13 @@ export default class DefaultHttpFeignClientExecutor<T extends FeignProxyClient =
         return requestMappingParams;
     }
 
-    private resolverRequestHeaders = (request: Partial<RestfulHttpRequest>, methodName: string) => {
+    private resolverRequestHeaders = (originalParameter: Record<string, any>, methodName: string) => {
         const {configuration, apiService} = this;
         const {requestHeaderResolver, globalHeaders} = configuration;
-        // resolver headers
-        const {headers, body, uriVariables} = request;
-        const requestHeaders = requestHeaderResolver(apiService, methodName, headers, body as object);
         return {
             ...globalHeaders,
-            ...requestHeaderResolver(apiService, methodName, requestHeaders, uriVariables)
+            // resolver headers
+            ...requestHeaderResolver(apiService, methodName, {}, originalParameter as object)
         }
     }
 }

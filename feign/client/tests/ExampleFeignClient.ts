@@ -91,5 +91,15 @@ export default class ExampleFeignClient {
             }
         },
         options?: FeignRequestOptions) => Promise<number>;
+
+    @GetMapping({
+        value: "test-example2",
+        headers: {myHeader: "tk_{memberId}"},
+        produces: [HttpMediaType.APPLICATION_JSON_UTF8],
+        queryArgNames: ["query"]
+    })
+    testExample4: (
+        request: { memberId: number },
+        options?: FeignRequestOptions) => Promise<number>;
 }
 

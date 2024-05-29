@@ -33,7 +33,11 @@ const routing = (url: string, routeMapping: Record<string, string>) => {
     }
     const routeUri = new URL(serviceUri);
     const [protocol] = routeUri.protocol.split(":");
-    return normalizeUrl(`${protocol}://${routeUri.host}${routeUri.pathname}${_url.pathname}`);
+    const result = normalizeUrl(`${protocol}://${routeUri.host}${routeUri.pathname}${_url.pathname}`);
+    if (_url.query) {
+        return `${result}${_url.query}`;
+    }
+    return result;
 };
 
 
