@@ -92,4 +92,12 @@ describe("test api sign", () => {
         expect(SHA256_WITH_RSA.verify(signatureRequest, publicKey, signByJava)).toEqual(true);
     })
 
+    test("query params encoding", () => {
+        const result = getCanonicalizedQueryString({
+            uid: "%3D%3D",
+            querySize: 1
+        })
+        expect(result).toEqual("querySize=1&uid=%3D%3D");
+    })
+
 });
