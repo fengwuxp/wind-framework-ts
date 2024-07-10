@@ -1,0 +1,50 @@
+{
+  "name": "yueque-doc-exporter",
+  "version": "1.0.0",
+  "description": "语雀文档导出工具",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fengwuxp/wind-framework-ts"
+  },
+  "bugs": {
+    "url": "https://github.com/fengwuxp/wind-framework-ts/issues"
+  },
+  "homepage": "https://github.com/fengwuxp/wind-framework-ts#readme",
+  "main": "lib/index.js",
+  "module": "es/index.js",
+  "esnext": "esnext/index.js",
+  "typings": "types/index.d.ts",
+  "files": [
+    "lib",
+    "es",
+    "esnext",
+    "types"
+  ],
+  "author": "wuxp",
+  "license": "ISC",
+  "scripts": {
+    "install:dependencies": "yarn install",
+    "test": "jest --config ./jest.config.js --verbose=false",
+    "build:ts": "rm -rf ./types && tsc -p ./tsconfig.lib.json --emitDeclarationOnly",
+    "build:lib": "rm -rf ./dist && rm -rf ./es  && npm run build:ts && rollup -c rollup.config.ts --configPlugin @rollup/plugin-typescript && rm -rf ./types-temp",
+    "npm:publish": "npm publish",
+    "deploy:lib": "npm run build:lib && npm run npm:publish"
+  },
+  "keywords": [
+    "yuque exporter"
+  ],
+  "dependencies": {
+    "axios": "^1.7.2",
+    "commander": "^12.1.0",
+    "fs-extra": "^11.2.0",
+    "log4js": "^6.9.1",
+    "node-fetch": "2.6.7"
+  },
+  "devDependencies": {
+    "@types/debug": "^4.1.12",
+    "@types/fs-extra": "^11.0.4"
+  }
+}
