@@ -14,7 +14,7 @@ export default {
     categories: {
         default: {
             appenders: ["output"],
-            level: "debug",
+            level: "info",
             enableCallStack: true
         },
     },

@@ -139,9 +139,7 @@ export default class BrowserApiRequester {
             let progress = 0;
             response.data.on('data', (chunk) => {
                 progress += chunk.length;
-                logger.info(
-                    `Downloaded ${(progress / totalLength * 100).toFixed(2)}%`
-                );
+                logger.debug(`Downloaded ${(progress / totalLength * 100).toFixed(2)}%`);
             });
 
             response.data.pipe(writer);
