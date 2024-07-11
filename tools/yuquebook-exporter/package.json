@@ -1,7 +1,7 @@
 {
-  "name": "yueque-doc-exporter",
+  "name": "wind-yuquebook",
   "version": "1.0.0",
-  "description": "语雀文档导出工具",
+  "description": "企业版语雀文档导出工具",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
