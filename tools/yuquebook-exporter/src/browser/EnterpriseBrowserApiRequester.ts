@@ -16,11 +16,14 @@ export default class EnterpriseBrowserApiRequester {
 
     private readonly headers: Record<any, any>;
 
+    private readonly apiUrl: string;
+
     private readonly url: string;
 
     constructor(headers: Record<any, any>, appName: string) {
         this.headers = headers;
-        this.url = `https://${appName}.yuque.com/api`;
+        this.url = `https://${appName}.yuque.com`;
+        this.apiUrl = `${this.url}/api`;
     }
 
     getMineCommonUsed = () => {
@@ -33,7 +36,7 @@ export default class EnterpriseBrowserApiRequester {
     getPublicBookGroups = (): Promise<Array<PublicBookGroup>> => {
         return this.getMineCommonUsed().then(({groups}) => {
             const organizationId = groups[0].organization_id
-            return axios.get(`${this.url}/modules/org_wiki/wiki/show?organizationId=${organizationId}`, {headers: this.headers}).then(resp => resp.data)
+            return axios.get(this.getApiRequestUrl(`/modules/org_wiki/wiki/show?organizationId=${organizationId}`), {headers: this.headers}).then(resp => resp.data)
         }).then(resp => {
             return resp.layouts[0].placements[0].blocks.filter(block => {
                 return block.title === '知识库分组'
@@ -42,12 +45,12 @@ export default class EnterpriseBrowserApiRequester {
     }
 
     /**
-     * 获取团队列表
+     * 获取团队列表(有权限的)
      */
     getGroups = (): Promise<Array<GroupListItem>> => {
         return this.getMineCommonUsed().then(({groups}) => {
             const organizationId = groups[0].organization_id
-            return this.httpGet(`/organizations/${organizationId}/dashboard/groups?offset=0&limit=100`)
+            return this.httpGet(`/mine/groups?offset=0&limit=200&organization_id=${organizationId}`);
         });
     }
 
@@ -82,10 +85,17 @@ export default class EnterpriseBrowserApiRequester {
      * @return 文件保存路径地址
      */
     exportDocs = (doc: DocListItem, output: string): Promise<string> => {
+        return this.retryExportDocs(doc, output, 0);
+    }
+
+    private retryExportDocs = (doc: DocListItem, output: string, count: number) => {
+        if (count > 5) {
+            return Promise.reject(`重试次数超过 5 次`);
+        }
         const requestBody: any = {
             "force": 0
         };
-        if (doc.type === 'Sheet') {
+        if (doc.type === 'Sheet' || doc.type === 'Table') {
             requestBody.type = "excel";
         } else if (doc.type === 'Doc') {
             requestBody.options = "{\"latexType\":1}"
@@ -93,8 +103,8 @@ export default class EnterpriseBrowserApiRequester {
         } else {
             throw new Error(`不支持的文档类型：${doc.type}`)
         }
-        const url = `${this.url}/docs/${doc.id}/export`;
-        return fetch(url, {
+        const exportRequestUrl = this.getApiRequestUrl(`/docs/${doc.id}/export`);
+        return fetch(exportRequestUrl, {
             method: "POST",
             body: JSON.stringify(requestBody),
             headers: {
@@ -112,35 +122,17 @@ export default class EnterpriseBrowserApiRequester {
                 if (resp.state === "success") {
                     return resp.url;
                 } else {
-                    // 轮询
-                    return this.pollExportState(url, 0);
-                }
-            }).then(url => {
-                let downloadUrl: string = url;
-                if (downloadUrl.startsWith(this.url)) {
-                    downloadUrl =
-                        `${this.url}/${downloadUrl}`
-                    ;
-                }
-                return this.downloadFile(downloadUrl, output)
-            });
-    }
-
-    private pollExportState = (exportUrl: string, count: number) => {
-        if (count > 6) {
-            return Promise.reject(`轮询次数超过 6 次`);
-        }
-        return axios.get(exportUrl, {headers: this.headers})
-            .then((d: any) => d.data)
-            .then(resp => {
-                if (resp.state === "success") {
-                    return resp.url;
-                } else {
+                    // 重试
                     return new Promise(resolve => {
                         // 等待 1.5s
                         setTimeout(resolve, 1500)
-                    }).then(() => this.pollExportState(exportUrl, count++));
+                    }).then(() => this.retryExportDocs(doc, output, count++));
                 }
+            }).then((url: string) => {
+                if (!url.startsWith(this.url)) {
+                    url = `${this.url}${url}`;
+                }
+                return this.downloadFile(url, output)
             });
     }
 
@@ -153,15 +145,9 @@ export default class EnterpriseBrowserApiRequester {
         return axios.get(url, {headers: this.headers, responseType: 'stream'}).then(response => {
             // @ts-ignore
             const totalLength = response.headers['content-length'];
-            const disposition: string = response.headers['content-disposition']
-            // 获取 utf-8 name
-            const [_, fileNameParam] = disposition.split(";")[2].split("=");
-            // UTF-8''xxxx.md
-            const fileName = decodeURI(fileNameParam.substring(7, fileNameParam.length));
+            const fileName = this.parseFileName(response.headers['content-disposition']);
 
-            const filepath =
-                `${output}/${fileName}`
-            ;
+            const filepath = `${output}/${fileName}`;
             fs.createFileSync(filepath);
             const writer = fs.createWriteStream(filepath);
             let progress = 0;
@@ -169,7 +155,6 @@ export default class EnterpriseBrowserApiRequester {
                 progress += chunk.length;
                 logger.debug(`Downloaded ${(progress / totalLength * 100).toFixed(2)}%`);
             });
-
             response.data.pipe(writer);
             return new Promise<string>((resolve, reject) => {
                 writer.on('finish', () => {
@@ -183,9 +168,19 @@ export default class EnterpriseBrowserApiRequester {
         })
     }
 
-    private httpGet = (path: string) => {
-        return axios.get(
-            `${this.url}${path}`
-            , {headers: this.headers}).then((resp: any) => resp.data.data);
+    private httpGet = (uri: string) => {
+        return axios.get(this.getApiRequestUrl(uri), {headers: this.headers}).then((resp: any) => resp.data.data);
+    }
+
+    private getApiRequestUrl = (uri: string) => {
+        return `${this.apiUrl}${uri}`
+    }
+
+    private parseFileName(disposition: string) {
+        const parts = disposition.split(";");
+        // 获取  name
+        const [_, fileNameParam] = parts.pop().split("=");
+        // UTF-8''xxxx.md
+        return fileNameParam.includes("UTF-8") ? decodeURI(fileNameParam.substring(7, fileNameParam.length)) : fileNameParam.substring(1, fileNameParam.length);
     }
 }

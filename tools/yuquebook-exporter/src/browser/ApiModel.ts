@@ -70,7 +70,7 @@ export interface GroupBookStacksDetails {
 export interface DocListItem extends Record<string, any> {
     id: number;
     space_id: number;
-    type: "Doc" | "Sheet";
+    type: "Doc" | "Sheet"|'Table';
     sub_type: string;
     title: string;
     title_draft: string;

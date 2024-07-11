@@ -1,6 +1,11 @@
 import {program} from 'commander';
 import {DocumentDownloader} from "./browser/DocumentDownloader";
+import * as log4js from "log4js";
+import log4jConfig from "./log4j.config";
 
+log4js.configure(log4jConfig);
+
+const logger = log4js.getLogger('YuqueBook');
 const pkg = require('../package.json');
 
 program.version(pkg.version)
@@ -30,7 +35,10 @@ new DocumentDownloader({
     csrfToken,
     appName,
     output: output
-}).download()
+}).download().catch(error => {
+    logger.error("导出文档失败", error)
+    return Promise.resolve()
+})
 
 
 

@@ -35,20 +35,19 @@ export class DocumentDownloader {
     }
 
     download = async () => {
-        // 导出公共区文档
-        const publicBookGroups = await this.requester.getPublicBookGroups();
-        console.log("publicBookGroups",publicBookGroups)
-        for (const group of publicBookGroups) {
-            for (const bk of group.books) {
-                await this.eachGroupBook(`公共区-${group.name}`, bk)
-            }
-        }
         // 导出团队文档
         const groups = await this.requester.getGroups();
         for (const group of groups) {
             await this.eachGroup(group)
         }
         logger.info(`导出完成，成功数：${this.successCount}，失败数据：${this.errorCount}`);
+        // 导出公共区文档
+        const publicBookGroups = await this.requester.getPublicBookGroups();
+        for (const group of publicBookGroups) {
+            for (const bk of group.books) {
+                await this.eachGroupBook(`公共区-${group.name}`, bk)
+            }
+        }
     }
 
     private eachGroup = async (group: GroupListItem) => {
@@ -69,8 +68,8 @@ export class DocumentDownloader {
             try {
                 await this.requester.exportDocs(doc, path.join(this.output, groupName, book.name));
                 this.successCount++;
-            } catch (e) {
-                logger.error(`export doc group =  ${groupName}, book = ${book.name} error`, e);
+            } catch (error) {
+                logger.error(`export doc group =  ${groupName}, book = ${book.name} error`, error);
                 this.errorCount++;
             }
             logger.info(`导出 团队（group） =  ${groupName}, 知识库（book） = ${book.name} doc = ${doc.title} 成功`)
