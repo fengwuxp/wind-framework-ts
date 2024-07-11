@@ -1,6 +1,6 @@
 import axios from 'axios';
 import fetch from 'node-fetch';
-import {DocListItem, GroupBookStacksDetails, GroupListItem} from "./ApiModel";
+import {DocListItem, GroupBookStacksDetails, GroupListItem, PublicBookGroup} from "./ApiModel";
 import * as fs from "fs-extra";
 import * as log4js from "log4js";
 import log4jConfig from "../log4j.config";
@@ -9,7 +9,10 @@ log4js.configure(log4jConfig);
 
 const logger = log4js.getLogger('BrowserApiRequester');
 
-export default class BrowserApiRequester {
+/**
+ * 企业版语雀文档浏览器版本接口
+ */
+export default class EnterpriseBrowserApiRequester {
 
     private readonly headers: Record<any, any>;
 
@@ -20,9 +23,34 @@ export default class BrowserApiRequester {
         this.url = `https://${appName}.yuque.com/api`;
     }
 
-    getGroupQuickLinks = (): Promise<Array<GroupListItem>> => {
-        return this.httpGet(`/mine/group_quick_links`)
+    getMineCommonUsed = () => {
+        return this.httpGet(`/mine/common_used`)
     }
+
+    /**
+     * 获取公共区知识库分组
+     */
+    getPublicBookGroups = (): Promise<Array<PublicBookGroup>> => {
+        return this.getMineCommonUsed().then(({groups}) => {
+            const organizationId = groups[0].organization_id
+            return axios.get(`${this.url}/modules/org_wiki/wiki/show?organizationId=${organizationId}`, {headers: this.headers}).then(resp => resp.data)
+        }).then(resp => {
+            return resp.layouts[0].placements[0].blocks.filter(block => {
+                return block.title === '知识库分组'
+            })[0].data;
+        });
+    }
+
+    /**
+     * 获取团队列表
+     */
+    getGroups = (): Promise<Array<GroupListItem>> => {
+        return this.getMineCommonUsed().then(({groups}) => {
+            const organizationId = groups[0].organization_id
+            return this.httpGet(`/organizations/${organizationId}/dashboard/groups?offset=0&limit=100`)
+        });
+    }
+
 
     /**
      * 获取团队详情
@@ -158,6 +186,6 @@ export default class BrowserApiRequester {
     private httpGet = (path: string) => {
         return axios.get(
             `${this.url}${path}`
-            , {headers: this.headers}).then((d: any) => d.data.data);
+            , {headers: this.headers}).then((resp: any) => resp.data.data);
     }
 }

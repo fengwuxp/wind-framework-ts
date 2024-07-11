@@ -1,4 +1,4 @@
-import BrowserApiRequester from "./BrowserApiRequester";
+import EnterpriseBrowserApiRequester from "./EnterpriseBrowserApiRequester";
 import {GroupBook, GroupListItem} from "./ApiModel";
 import * as path from "path";
 import * as process from "process";
@@ -18,7 +18,7 @@ export interface DocumentDownloaderOptions {
 
 export class DocumentDownloader {
 
-    private readonly requester: BrowserApiRequester;
+    private readonly requester: EnterpriseBrowserApiRequester;
 
     private readonly output: string;
 
@@ -27,7 +27,7 @@ export class DocumentDownloader {
     private errorCount = 0;
 
     constructor(options: DocumentDownloaderOptions) {
-        this.requester = new BrowserApiRequester({
+        this.requester = new EnterpriseBrowserApiRequester({
             "Cookie": options.cookie,
             "X-Csrf-Token": options.csrfToken
         }, options.appName);
@@ -35,7 +35,16 @@ export class DocumentDownloader {
     }
 
     download = async () => {
-        const groups = await this.requester.getGroupQuickLinks();
+        // 导出公共区文档
+        const publicBookGroups = await this.requester.getPublicBookGroups();
+        console.log("publicBookGroups",publicBookGroups)
+        for (const group of publicBookGroups) {
+            for (const bk of group.books) {
+                await this.eachGroupBook(`公共区-${group.name}`, bk)
+            }
+        }
+        // 导出团队文档
+        const groups = await this.requester.getGroups();
         for (const group of groups) {
             await this.eachGroup(group)
         }
@@ -43,10 +52,10 @@ export class DocumentDownloader {
     }
 
     private eachGroup = async (group: GroupListItem) => {
-        const groupBookStacks = await this.requester.getGroupBookStacks(group.target_id);
+        const groupBookStacks = await this.requester.getGroupBookStacks(group.id);
         for (const stack of groupBookStacks) {
             for (const bk of stack.books) {
-                await this.eachGroupBook(group.target.name, bk)
+                await this.eachGroupBook(group.name, bk)
             }
         }
     }
@@ -64,7 +73,7 @@ export class DocumentDownloader {
                 logger.error(`export doc group =  ${groupName}, book = ${book.name} error`, e);
                 this.errorCount++;
             }
-            logger.info(`导出 group =  ${groupName}, book = ${book.name} 成功`)
+            logger.info(`导出 团队（group） =  ${groupName}, 知识库（book） = ${book.name} doc = ${doc.title} 成功`)
         }
     }
 }

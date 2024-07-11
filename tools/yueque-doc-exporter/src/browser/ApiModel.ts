@@ -1,23 +1,47 @@
 export interface GroupListItem {
     id: number;
-    user_id: number;
-    organization_id: number;
     type: string;
-    icon: string;
-    title: string;
-    url: string;
-    order_num: number;
-    target_id: number;
-    target_type: string;
+    login: string;
+    name: string;
+    description: string;
+    avatar?: string;
+    avatar_url: string;
+    owner_id: number;
+    books_count: number;
+    public: number;
+    extend_private: number;
+    scene: string;
     created_at: string;
     updated_at: string;
-    ref_id: string;
-    target: {
-        id: number;
-        login: string;
-        name: string;
-    },
-    user: any;
+    organization_id: number;
+    isPaid: boolean;
+    member_level: number;
+    hasMemberLevel: boolean;
+    isTopLevel: boolean;
+    grains_sum: number;
+    status: number;
+    source: null,
+    zone_id: number;
+    isPermanentPunished: boolean;
+    isWiki: boolean;
+    isPublicPage: boolean;
+    owners: Array<any>,
+    _serializer: string;
+}
+
+export interface PublicBookGroup {
+    created_at: string;
+    display_type: number;
+    doc_order_type: 1
+    id: number;
+    is_default: null
+    name: string;
+    organization_id: number;
+    rank: number;
+    show_book_desc: number;
+    show_book_icon: number;
+    show_doc_updated_at: number;
+    books: Array<GroupBook>;
 }
 
 export interface GroupBook extends Record<string, any> {
