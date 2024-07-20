@@ -32,29 +32,35 @@ export class DocumentDownloader {
             "X-Csrf-Token": options.csrfToken
         }, options.appName);
         this.output = options.output ?? path.join(process.cwd(), "docs");
+        logger.info("output ==> ", this.output);
     }
 
     download = async () => {
+        const tasks = [];
         // 导出团队文档
         const groups = await this.requester.getGroups();
         for (const group of groups) {
-            await this.eachGroup(group)
+            tasks.push(this.eachGroup(group));
         }
         logger.info(`导出完成，成功数：${this.successCount}，失败数据：${this.errorCount}`);
         // 导出公共区文档
         const publicBookGroups = await this.requester.getPublicBookGroups();
         for (const group of publicBookGroups) {
             for (const bk of group.books) {
-                await this.eachGroupBook(`公共区-${group.name}`, bk)
+                tasks.push(this.eachGroupBook(`公共区-${group.name}`, bk))
             }
         }
+        await Promise.all(tasks);
     }
 
     private eachGroup = async (group: GroupListItem) => {
         const groupBookStacks = await this.requester.getGroupBookStacks(group.id);
         for (const stack of groupBookStacks) {
             for (const bk of stack.books) {
-                await this.eachGroupBook(group.name, bk)
+                try {
+                    await this.eachGroupBook(group.name, bk)
+                } catch (e) {
+                }
             }
         }
     }

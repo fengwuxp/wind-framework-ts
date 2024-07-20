@@ -1,6 +1,6 @@
 {
   "name": "wind-yuquebook",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "description": "企业版语雀文档导出工具",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
