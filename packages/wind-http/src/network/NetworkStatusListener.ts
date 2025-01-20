@@ -5,14 +5,14 @@ export interface NetworkStatusListener {
 
     /**
      * get network status
+     * @return 网络状态
      */
     getNetworkStatus: () => Promise<NetworkStatus>;
 
-
     /**
-     * listener
+     * @param callback
      */
-    onChange: (callback: (networkStatus: NetworkStatus) => void) => void;
+    onChange: (callback: (status: NetworkStatus, prevStatus?: NetworkStatus) => void) => void;
 }
 
 // wifi	    wifi network

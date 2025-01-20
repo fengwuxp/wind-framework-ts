@@ -1,7 +1,7 @@
 import {HttpRequest} from "wind-http";
 
 
-export interface TarojsHttpRequest extends HttpRequest{
+export interface TaroJsHttpRequest extends HttpRequest{
 
     /**
      * referrer

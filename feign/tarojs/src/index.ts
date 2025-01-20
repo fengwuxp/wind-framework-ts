@@ -1,5 +1,5 @@
-export {default as TarojsHttpAdaptor} from "./adapter/TarojsHttpAdaptor";
-export {TarojsHttpRequest} from "./adapter/TarojsHttpRequest";
-export {default as TarojsNetworkStatusListener} from "./TarojsNetworkStatusListener";
+export {default as TaroJsHttpAdaptor} from "./adapter/TaroJsHttpAdaptor";
+export {TaroJsHttpRequest} from "./adapter/TaroJsHttpRequest";
+export {default as TaroJsNetworkStatusListener} from "./TaroJsNetworkStatusListener";
 
 

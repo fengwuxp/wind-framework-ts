@@ -44,9 +44,10 @@
     "@types/url-parse": "^1.4.11"
   },
   "dependencies": {
-    "wind-common-utils": "^1.0.0",
-    "wind-api-signature": "^1.0.0",
+    "@howiefh/ant-path-matcher": "^0.0.4",
     "lodash": "^4.17.15",
-    "url-parse": "^1.5.10"
+    "url-parse": "^1.5.10",
+    "wind-api-signature": "^1.0.0",
+    "wind-common-utils": "^1.0.0"
   }
 }

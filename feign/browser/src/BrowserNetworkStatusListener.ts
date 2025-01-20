@@ -30,13 +30,23 @@ const connection = navigator.connection || navigator.mozConnection || navigator.
  */
 export default class BrowserNetworkStatusListener implements NetworkStatusListener {
 
+    private readonly prevStatus: Record<'value', NetworkStatus>;
+
+    constructor() {
+        this.prevStatus = {
+            value: this.processNetworkStats(),
+        };
+    }
+
     getNetworkStatus = (): Promise<NetworkStatus> => {
         return Promise.resolve(this.processNetworkStats());
     };
 
-    onChange = (callback: (networkStatus: NetworkStatus) => void) => {
+    onChange = (callback: (networkStatus: NetworkStatus, prevStatus?: NetworkStatus) => void) => {
         connection.onchange = () => {
-            callback(this.processNetworkStats());
+            const status = this.processNetworkStats();
+            callback(status, this.prevStatus.value);
+            this.prevStatus.value = status;
         }
     };
 
@@ -78,7 +88,7 @@ export default class BrowserNetworkStatusListener implements NetworkStatusListen
                 return BrowserNetworkStatus["3g"]
             } else if (connection.bandwidth > 0) {
                 return BrowserNetworkStatus["2g"]
-            } else if (connection.bandwidth == 0) {
+            } else if (connection.bandwidth === 0) {
                 return BrowserNetworkStatus.none;
             } else {
                 return BrowserNetworkStatus.unknown;

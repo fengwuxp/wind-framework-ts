@@ -1,9 +1,10 @@
-import { HttpMediaType } from 'wind-common-utils/lib/http/HttpMediaType';
-export { HttpMediaType, matchMediaType } from 'wind-common-utils/lib/http/HttpMediaType';
-import { DateFormatType } from 'wind-common-utils/lib/date/DateFormatUtils';
-import { ApiRequestSinger } from 'wind-api-signature';
-import { PathMatcher } from 'wind-common-utils/lib/match/PathMatcher';
-import { ParsedUrlQueryInput } from 'querystring';
+import {HttpMediaType} from 'wind-common-utils/lib/http/HttpMediaType';
+import {DateFormatType} from 'wind-common-utils/lib/date/DateFormatUtils';
+import {ApiRequestSinger} from 'wind-api-signature';
+import {PathMatcher} from 'wind-common-utils/lib/match/PathMatcher';
+import {ParsedUrlQueryInput} from 'querystring';
+
+export {HttpMediaType, matchMediaType} from 'wind-common-utils/lib/http/HttpMediaType';
 
 /**
  * http request method
@@ -34,6 +35,7 @@ type QueryParamType = Record<string, boolean | number | string | Date | UriPathV
  * example url: "http://a.b.com/",{module:"member",id:1}  ==> "http://a.b.com/?module=member&id=1"
  */
 type UriVariable = UriPathVariable | QueryParamType;
+
 /**
  * The payload object used to make the HTTP request
  * {@see HttpAdapter}
@@ -58,6 +60,7 @@ interface HttpRequest {
      */
     headers?: HeadersInit;
 }
+
 /**
  * http retry options
  * {@see RetryHttpClient}
@@ -83,6 +86,7 @@ interface HttpRetryOptions {
      * @param response
      */
     when?: (response: HttpResponse) => boolean;
+
     /**
      * custom retry processing
      * @param request  request data
@@ -90,6 +94,7 @@ interface HttpRetryOptions {
      */
     onRetry?(request: HttpRequest, response: HttpResponse): Promise<HttpResponse>;
 }
+
 /**
  * The http request context
  */
@@ -109,6 +114,7 @@ interface HttpRequestContextAttributes extends Record<string, any> {
      */
     showProcessBar?: boolean;
 }
+
 /**
  * http request response
  *
@@ -137,6 +143,7 @@ interface HttpResponse<T = any> {
      */
     headers?: Record<string, string>;
 }
+
 /**
  * http request adapter
  *
@@ -378,6 +385,7 @@ declare abstract class AbstractHttpClient<T extends HttpRequest = HttpRequest> i
 interface AuthenticationStrategy<T extends HttpRequest> {
     authentication: (request: T) => Promise<T>;
 }
+
 interface AuthenticationToken {
     /**
      * authorization info
@@ -417,6 +425,7 @@ type ClientHttpRequestExecution<T extends HttpRequest = HttpRequest, R = any> = 
  *  @return promise request response object
  */
 type ClientHttpRequestInterceptorFunction<T extends HttpRequest = HttpRequest, R = any> = (request: T, context: HttpRequestContextAttributes, next: ClientHttpRequestExecution<T, R>) => Promise<R>;
+
 /**
  * Intercepts client-side HTTP requests.
  * Only executed in http client
@@ -429,10 +438,13 @@ interface ClientHttpRequestInterceptorInterface<T extends HttpRequest = HttpRequ
      */
     intercept: ClientHttpRequestInterceptorFunction<T, R>;
 }
+
 /**
  * Throw an exception or Promise#reject will interrupt the request
  */
-type ClientHttpRequestInterceptor<T extends HttpRequest = HttpRequest> = ClientHttpRequestInterceptorFunction<T> | ClientHttpRequestInterceptorInterface<T>;
+type ClientHttpRequestInterceptor<T extends HttpRequest = HttpRequest> =
+    ClientHttpRequestInterceptorFunction<T>
+    | ClientHttpRequestInterceptorInterface<T>;
 
 /**
  * default http client
@@ -444,6 +456,7 @@ declare class DefaultHttpClient<T extends HttpRequest = HttpRequest> extends Abs
     private readonly httpAdapter;
     private readonly interceptors?;
     private readonly defaultProduce;
+
     /**
      * In order to support different js runtime environments, the following parameters need to be provided
      * @param httpAdapter     Request adapters for different platforms
@@ -451,6 +464,7 @@ declare class DefaultHttpClient<T extends HttpRequest = HttpRequest> extends Abs
      * @param defaultProduce  default request Body Content-Type
      */
     constructor(httpAdapter: HttpAdapter, interceptors?: ClientHttpRequestInterceptor[], defaultProduce?: HttpMediaType);
+
     /**
      * send a http request to a remote server
      * @param request
@@ -487,6 +501,7 @@ interface RefreshTokenAuthenticationOptions {
      */
     aheadOfTimes?: number;
 }
+
 /**
  * Refresh token authentication strategy
  */
@@ -494,7 +509,9 @@ declare class RefreshTokenAuthenticationStrategy implements AuthenticationStrate
     private readonly options;
     private waitRequestQueue;
     private refreshing;
+
     constructor(options: RefreshTokenAuthenticationOptions);
+
     authentication: (request: HttpRequest) => Promise<HttpRequest>;
     private refreshToken;
     private syncRefreshToken;
@@ -512,7 +529,9 @@ declare class RetryHttpClient<T extends HttpRequest = HttpRequest> extends Abstr
     private readonly retryOptions;
     private countRetry;
     private retryEnd;
+
     constructor(httpClient: HttpClient<T>, retryOptions: HttpRetryOptions);
+
     send: (request: T, context?: HttpRequestContextAttributes) => Promise<HttpResponse>;
     /**
      * try retry request
@@ -560,6 +579,7 @@ declare const stringDateConverter: (fmt?: DateFormatType) => DateConverter;
 interface ResponseExtractorInterface<T = any> {
     extractData: ResponseExtractorFunction<T>;
 }
+
 /**
  * Extract data from the given {@code HttpResponse} and return it.
  * @param response the HTTP response
@@ -585,6 +605,7 @@ interface RestfulHttpRequest extends HttpRequest {
      */
     uriVariables?: UriVariable;
 }
+
 /**
  * Interface specifying a basic set of RESTful operations.
  * Implemented by {@link RestTemplate}. Not often used directly, but a useful
@@ -742,7 +763,9 @@ interface HttpRequestDataEncoder {
  */
 declare class DateEncoder implements HttpRequestDataEncoder {
     private dateConverter;
+
     constructor(dateConverter?: DateConverter);
+
     encode: (request: RestfulHttpRequest) => Promise<RestfulHttpRequest>;
     private converterDate;
 }
@@ -764,7 +787,9 @@ interface HttpResponseDataDecoder<E = any> {
 declare class HttpRequestCodec {
     protected encoders: HttpRequestDataEncoder[];
     protected decoders: HttpResponseDataDecoder[];
+
     constructor(encoders: HttpRequestDataEncoder[], decoders?: HttpResponseDataDecoder[]);
+
     response: <E = any>(request: RestfulHttpRequest, response: E) => Promise<E>;
     request: (request: RestfulHttpRequest) => Promise<RestfulHttpRequest>;
 }
@@ -772,10 +797,13 @@ declare class HttpRequestCodec {
 interface HttpResponseEventPublisher {
     publishEvent: (request: HttpRequest, response: HttpResponse) => void;
 }
+
 type HttpResponseEventHandler = (request: HttpRequest, response: HttpResponse) => void;
+
 interface HttpResponseEventHandlerSupplier {
     getHandlers: (httpStatus: HttpStatus | number) => HttpResponseEventHandler[];
 }
+
 interface HttpResponseEventListener extends HttpResponseEventHandlerSupplier {
     /**
      * 回调指定的的 http status handler
@@ -783,30 +811,37 @@ interface HttpResponseEventListener extends HttpResponseEventHandlerSupplier {
      * @param handler
      */
     onEvent(httpStatus: HttpStatus | number, handler: HttpResponseEventHandler): void;
+
     removeListen(httpStatus: HttpStatus | number): void;
+
     removeListen(httpStatus: HttpStatus | number, handler: HttpResponseEventHandler): void;
 }
+
 interface SmartHttpResponseEventListener extends HttpResponseEventListener {
     /**
      * 所有非 2xx 响应都会回调
      * @param handler
      */
     onError(handler: HttpResponseEventHandler): void;
+
     /**
      * @see HttpStatus#FOUND
      * @param handler
      */
     onFound(handler: HttpResponseEventHandler): void;
+
     /**
      * @see HttpStatus#UNAUTHORIZED
      * @param handler
      */
     onUnAuthorized(handler: HttpResponseEventHandler): void;
+
     /**
      * @see HttpStatus#FORBIDDEN
      * @param handler
      */
     onForbidden(handler: HttpResponseEventHandler): void;
+
     /**
      * remove handle
      * @param handler
@@ -823,7 +858,9 @@ declare class HttpResponseEventPublisherInterceptor<T extends HttpRequest> imple
      * @private
      */
     private readonly publisher;
+
     constructor(publisher: HttpResponseEventPublisher);
+
     intercept: (request: T, context: HttpRequestContextAttributes, next: ClientHttpRequestExecution<T>) => Promise<any>;
 }
 
@@ -836,7 +873,9 @@ declare class SimpleHttpResponseEventListener implements SmartHttpResponseEventL
     onUnAuthorized: (handler: HttpResponseEventHandler) => void;
     onError: (handler: HttpResponseEventHandler) => void;
     removeErrorListen: (handler: HttpResponseEventHandler) => void;
+
     removeListen(httpStatus: HttpStatus | number, handler?: HttpResponseEventHandler): void;
+
     getHandlers: (httpStatus: HttpStatus | number) => HttpResponseEventHandler[];
     private isSuccessful;
     private getHandlersByHttpStatus;
@@ -846,7 +885,9 @@ declare class SimpleHttpResponseEventListener implements SmartHttpResponseEventL
 
 declare class SimpleHttpResponseEventPublisher implements HttpResponseEventPublisher {
     private readonly supplier;
+
     constructor(supplier: HttpResponseEventHandlerSupplier);
+
     publishEvent: (request: HttpRequest, response: HttpResponse) => void;
 }
 
@@ -857,7 +898,9 @@ declare class SimpleHttpResponseEventPublisher implements HttpResponseEventPubli
 declare class ApiSignatureRequestInterceptor<T extends HttpRequest> implements ClientHttpRequestInterceptorInterface<T> {
     private static readonly LOG;
     private readonly signer;
+
     constructor(signer: ApiRequestSinger);
+
     intercept: (request: T, context: any, next: any) => Promise<any>;
 }
 
@@ -868,7 +911,9 @@ declare class ApiSignatureRequestInterceptor<T extends HttpRequest> implements C
  */
 declare class AuthenticationClientHttpRequestInterceptor<T extends HttpRequest> implements ClientHttpRequestInterceptorInterface<T> {
     private readonly authenticationStrategy;
+
     constructor(authenticationStrategy: AuthenticationStrategy<T>);
+
     intercept: (request: T, context: HttpRequestContextAttributes, next: ClientHttpRequestExecution<T>) => Promise<any>;
 }
 
@@ -876,6 +921,7 @@ interface HttpHeader {
     name: string;
     value: string;
 }
+
 /**
  * use match interceptor is executed before the request
  */
@@ -887,7 +933,9 @@ declare abstract class MappedInterceptor {
     protected includeHeaders: HttpHeader[];
     protected excludeHeaders: HttpHeader[];
     protected pathMatcher: PathMatcher;
+
     constructor(includePatterns: string[], excludePatterns: string[], includeMethods: HttpMethod[], excludeMethods: HttpMethod[], includeHeaders?: string[][], excludeHeaders?: string[][]);
+
     /**
      * Determine a match for the given lookup path.
      * @param request
@@ -927,7 +975,9 @@ declare abstract class MappedInterceptor {
  */
 declare class MappedClientHttpRequestInterceptor<T extends HttpRequest = HttpRequest> extends MappedInterceptor implements ClientHttpRequestInterceptorInterface<T> {
     private readonly clientInterceptor;
+
     constructor(clientInterceptor: ClientHttpRequestInterceptor<T>, includePatterns?: string[], excludePatterns?: string[], includeMethods?: HttpMethod[], excludeMethods?: HttpMethod[], includeHeaders?: string[][], excludeHeaders?: string[][]);
+
     intercept: (request: T, context: HttpRequestContextAttributes, next: ClientHttpRequestExecution<T>) => Promise<any>;
 }
 
@@ -940,12 +990,15 @@ declare class RoutingClientHttpRequestInterceptor<T extends HttpRequest = HttpRe
      * mapping between api module and url
      */
     constructor(routeMapping: Record<string, string> | string);
+
     intercept: (request: T, context: HttpRequestContextAttributes, next: ClientHttpRequestExecution<T>) => Promise<any>;
 }
 
 declare class TraceClientHttpRequestInterceptor<T extends HttpRequest> implements ClientHttpRequestInterceptorInterface<T> {
     private readonly traceIdHeaderName;
+
     constructor(traceIdHeaderName?: string);
+
     intercept: (request: T, context: HttpRequestContextAttributes, next: ClientHttpRequestExecution<T, any>) => Promise<any>;
 }
 
@@ -958,47 +1011,76 @@ declare class Log4jLevel {
     static ERROR: Log4jLevel;
     readonly name: string;
     readonly level: number;
+
     private constructor();
+
     static getLogLevel: (level: string) => number;
+
     static of(name: string, level: number): Log4jLevel;
 }
 
 interface Log4jLogger {
     level: Log4jLevel;
+
     log(...args: any[]): void;
+
     isLevelEnabled(level?: string): boolean;
+
     isTraceEnabled(): boolean;
+
     isDebugEnabled(): boolean;
+
     isInfoEnabled(): boolean;
+
     isWarnEnabled(): boolean;
+
     isErrorEnabled(): boolean;
+
     trace(message: any, ...args: any[]): void;
+
     debug(message: any, ...args: any[]): void;
+
     info(message: any, ...args: any[]): void;
+
     warn(message: any, ...args: any[]): void;
+
     error(message: any, ...args: any[]): void;
 }
 
 declare abstract class AbstractLog4jLogger implements Log4jLogger {
     protected readonly category: string;
     level: Log4jLevel;
+
     protected constructor(category?: string, level?: Log4jLevel);
+
     isLevelEnabled(level: string): boolean;
+
     isDebugEnabled(): boolean;
+
     isErrorEnabled(): boolean;
+
     isInfoEnabled(): boolean;
+
     isTraceEnabled(): boolean;
+
     isWarnEnabled(): boolean;
+
     abstract log(...args: any[]): void;
+
     debug(message: any, ...args: any[]): void;
+
     error(message: any, ...args: any[]): void;
+
     info(message: any, ...args: any[]): void;
+
     trace(message: any, ...args: any[]): void;
+
     warn(message: any, ...args: any[]): void;
 }
 
 declare class ConsoleLogger extends AbstractLog4jLogger {
     constructor(category?: string, level?: Log4jLevel);
+
     log(...args: any[]): void;
 }
 
@@ -1006,6 +1088,7 @@ interface HttpLog4jFactory {
     getLogger: (category?: string) => Log4jLogger;
     getRootLogger: () => Log4jLogger;
 }
+
 declare let DefaultHttpLo4jFactory: HttpLog4jFactory;
 declare const setDefaultHttpLo4jFactory: (factory: HttpLog4jFactory) => void;
 
@@ -1047,6 +1130,7 @@ interface NetworkStatusListener {
      */
     onChange: (callback: (networkStatus: NetworkStatus) => void) => void;
 }
+
 interface NetworkStatus {
     /**
      * 当前是否有网络连接
@@ -1057,6 +1141,7 @@ interface NetworkStatus {
      */
     networkType: NetworkType;
 }
+
 declare enum NetworkType {
     WIFI = "wifi",
     "2G" = "2g",
@@ -1087,7 +1172,9 @@ declare class NetworkClientHttpRequestInterceptor<T extends HttpRequest = HttpRe
     private networkStatus;
     private tryWaitNetworkCount;
     private spinWaitMaxTimes;
+
     constructor(networkStatusListener: NetworkStatusListener, noneNetworkHandler?: NoneNetworkFailBack<T>, tryWaitNetworkCount?: number, spinWaitMaxTimes?: number);
+
     intercept: (request: T, context: HttpRequestContextAttributes, next: ClientHttpRequestExecution<T>) => Promise<any>;
     private initNetwork;
     private handleFailBack;
@@ -1117,11 +1204,13 @@ declare class SimpleNoneNetworkFailBack<T extends HttpRequest = HttpRequest> imp
      * 最大的等待队列大小
      */
     private maxWaitLength;
+
     /**
      * @param maxWaitTime
      * @param maxWaitLength
      */
     constructor(maxWaitTime?: number, maxWaitLength?: number);
+
     onNetworkActive: () => (Promise<void> | void);
     onNetworkClose: (request: T) => (Promise<any> | any);
     private addWaitItem;
@@ -1144,6 +1233,7 @@ declare class SimpleNoneNetworkFailBack<T extends HttpRequest = HttpRequest> imp
 interface UriTemplateHandlerInterface {
     expand: UriTemplateHandlerFunction;
 }
+
 /**
  * Expand the given URI template with a map of URI variables.
  * @param uriTemplate the URI template
@@ -1159,6 +1249,7 @@ type UriTemplateHandler = UriTemplateHandlerInterface | UriTemplateHandlerFuncti
  * @param uriVariables url params
  */
 declare const defaultUriTemplateFunctionHandler: UriTemplateHandlerFunction;
+
 declare class DefaultUriTemplateHandler implements UriTemplateHandlerInterface {
     expand: UriTemplateHandlerFunction;
 }
@@ -1177,6 +1268,7 @@ interface ResponseErrorHandlerInterFace<T extends HttpRequest = HttpRequest, E =
      */
     handleError: ResponseErrorHandlerFunction<T, E>;
 }
+
 /**
  * Handle the error in the given response.
  * <p>This method is only called when {@link #hasError(ClientHttpResponse)}
@@ -1221,13 +1313,16 @@ interface RestTemplateOptions {
     businessResponseExtractor?: BusinessResponseExtractorFunction;
     codec?: HttpRequestCodec;
 }
+
 /**
  * http rest template
  */
 declare class RestTemplate implements RestOperations {
     private readonly httpClient;
     private readonly options;
+
     constructor(httpClient: HttpClient, options?: RestTemplateOptions);
+
     delete: (url: string, uriVariables?: UriVariable, headers?: Record<string, string>, context?: HttpRequestContextAttributes) => Promise<void>;
     getForEntity: <E = any>(url: string, uriVariables?: UriVariable, headers?: Record<string, string>, context?: HttpRequestContextAttributes) => Promise<HttpResponse<E>>;
     getForObject: <E = any>(url: string, uriVariables?: UriVariable, headers?: Record<string, string>, context?: HttpRequestContextAttributes) => Promise<E>;
@@ -1269,7 +1364,9 @@ declare class ProcessBarClientHttpRequestInterceptor<T extends HttpRequest> impl
      * 关闭 request progress bar fn
      */
     private closeRequestProgressBarFunction;
+
     constructor(progressBar: RequestProgressBarFunction, preventJitter?: boolean);
+
     intercept: (request: T, context: HttpRequestContextAttributes, next: ClientHttpRequestExecution<T>) => Promise<any>;
     private showProgressBar;
     private showRequestProgressBar;
@@ -1328,4 +1425,99 @@ declare const queryStringify: (obj: ParsedUrlQueryInput, filterNoneValue?: boole
  */
 declare const replacePathVariableValue: (uriTemplate: string, uriVariables: UriVariable) => string;
 
-export { AbstractHttpClient, AbstractLog4jLogger, ApiSignatureRequestInterceptor, AuthenticationClientHttpRequestInterceptor, type AuthenticationStrategy, type AuthenticationToken, type BusinessResponseExtractorFunction, CONTENT_LENGTH_HEAD_NAME, CONTENT_TRANSFER_ENCODING_HEAD_NAME, CONTENT_TYPE_HEAD_NAME, type ClientHttpRequestInterceptor, ConsoleLogger, DEFAULT_SERVICE_NAME, type DateConverter, DateEncoder, DefaultHttpClient, DefaultHttpLo4jFactory, DefaultNoneNetworkFailBack as DefaultNetworkStatusListener, DefaultUriTemplateHandler, HTTPS_SCHEMA, HTTP_SCHEMA, type HttpAdapter, type HttpClient, type HttpLog4jFactory, HttpMethod, type HttpRequest, HttpRequestCodec, type HttpRequestContextAttributes, type HttpRequestDataEncoder, type HttpResponse, type HttpResponseDataDecoder, type HttpResponseEventHandler, type HttpResponseEventHandlerSupplier, type HttpResponseEventListener, type HttpResponseEventPublisher, HttpResponseEventPublisherInterceptor, type HttpRetryOptions, HttpStatus, LB_SCHEMA, Log4jLevel, type Log4jLogger, MappedClientHttpRequestInterceptor, MappedInterceptor, NetworkClientHttpRequestInterceptor, type NetworkStatus, type NetworkStatusListener, NetworkType, type NoneNetworkFailBack, ProcessBarClientHttpRequestInterceptor, type QueryParamType, RefreshTokenAuthenticationStrategy, type RequestProgressBarFunction, type ResponseErrorHandler, type ResponseErrorHandlerFunction, type ResponseErrorHandlerInterFace, type ResponseExtractor, type ResponseExtractorFunction, type ResponseExtractorInterface, type RestOperations, RestTemplate, type RestfulHttpRequest, RetryHttpClient, RoutingClientHttpRequestInterceptor, SimpleHttpResponseEventListener, SimpleHttpResponseEventPublisher, SimpleNoneNetworkFailBack as SimpleNetworkStatusListener, type SmartHttpResponseEventListener, type SupportSerializableBody, TraceClientHttpRequestInterceptor, UNAUTHORIZED_RESPONSE, type UriTemplateHandler, type UriTemplateHandlerFunction, type UriTemplateHandlerInterface, type UriVariable, appendRouteMapping, convertFunctionInterface, defaultUriTemplateFunctionHandler, filterNoneValueAndNewObject, getRealRequestUrl, headResponseExtractor, objectResponseExtractor, optionsMethodResponseExtractor, queryStringify, replacePathVariableValue, responseIsFile, responseIsJson, responseIsText, restfulResponseExtractorFactory, serializeRequestBody, setDefaultHttpLo4jFactory, stringDateConverter, supportRequestBody, timeStampDateConverter, voidResponseExtractor };
+export {
+    AbstractHttpClient,
+    AbstractLog4jLogger,
+    ApiSignatureRequestInterceptor,
+    AuthenticationClientHttpRequestInterceptor,
+    type AuthenticationStrategy,
+    type AuthenticationToken,
+    type BusinessResponseExtractorFunction,
+    CONTENT_LENGTH_HEAD_NAME,
+    CONTENT_TRANSFER_ENCODING_HEAD_NAME,
+    CONTENT_TYPE_HEAD_NAME,
+    type ClientHttpRequestInterceptor,
+    ConsoleLogger,
+    DEFAULT_SERVICE_NAME,
+    type DateConverter,
+    DateEncoder,
+    DefaultHttpClient,
+    DefaultHttpLo4jFactory,
+    DefaultNoneNetworkFailBack as DefaultNetworkStatusListener,
+    DefaultUriTemplateHandler,
+    HTTPS_SCHEMA,
+    HTTP_SCHEMA,
+    type HttpAdapter,
+    type HttpClient,
+    type HttpLog4jFactory,
+    HttpMethod,
+    type HttpRequest,
+    HttpRequestCodec,
+    type HttpRequestContextAttributes,
+    type HttpRequestDataEncoder,
+    type HttpResponse,
+    type HttpResponseDataDecoder,
+    type HttpResponseEventHandler,
+    type HttpResponseEventHandlerSupplier,
+    type HttpResponseEventListener,
+    type HttpResponseEventPublisher,
+    HttpResponseEventPublisherInterceptor,
+    type HttpRetryOptions,
+    HttpStatus,
+    LB_SCHEMA,
+    Log4jLevel,
+    type Log4jLogger,
+    MappedClientHttpRequestInterceptor,
+    MappedInterceptor,
+    NetworkClientHttpRequestInterceptor,
+    type NetworkStatus,
+    type NetworkStatusListener,
+    NetworkType,
+    type NoneNetworkFailBack,
+    ProcessBarClientHttpRequestInterceptor,
+    type QueryParamType,
+    RefreshTokenAuthenticationStrategy,
+    type RequestProgressBarFunction,
+    type ResponseErrorHandler,
+    type ResponseErrorHandlerFunction,
+    type ResponseErrorHandlerInterFace,
+    type ResponseExtractor,
+    type ResponseExtractorFunction,
+    type ResponseExtractorInterface,
+    type RestOperations,
+    RestTemplate,
+    type RestfulHttpRequest,
+    RetryHttpClient,
+    RoutingClientHttpRequestInterceptor,
+    SimpleHttpResponseEventListener,
+    SimpleHttpResponseEventPublisher,
+    SimpleNoneNetworkFailBack as SimpleNetworkStatusListener,
+    type SmartHttpResponseEventListener,
+    type SupportSerializableBody,
+    TraceClientHttpRequestInterceptor,
+    UNAUTHORIZED_RESPONSE,
+    type UriTemplateHandler,
+    type UriTemplateHandlerFunction,
+    type UriTemplateHandlerInterface,
+    type UriVariable,
+    appendRouteMapping,
+    convertFunctionInterface,
+    defaultUriTemplateFunctionHandler,
+    filterNoneValueAndNewObject,
+    getRealRequestUrl,
+    headResponseExtractor,
+    objectResponseExtractor,
+    optionsMethodResponseExtractor,
+    queryStringify,
+    replacePathVariableValue,
+    responseIsFile,
+    responseIsJson,
+    responseIsText,
+    restfulResponseExtractorFactory,
+    serializeRequestBody,
+    setDefaultHttpLo4jFactory,
+    stringDateConverter,
+    supportRequestBody,
+    timeStampDateConverter,
+    voidResponseExtractor
+};

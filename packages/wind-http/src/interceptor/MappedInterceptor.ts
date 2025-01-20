@@ -1,8 +1,7 @@
-
-import SimplePathMatcher from "wind-common-utils/lib/match/SimplePathMatcher";
-import {PathMatcher} from "wind-common-utils/lib/match/PathMatcher";
+import AntPathMatcher from '@howiefh/ant-path-matcher';
 import {HttpMethod} from "../enums/HttpMethod";
 import {HttpRequest} from "../Http";
+import {PathMatcher} from "wind-common-utils/lib/match/PathMatcher";
 
 interface HttpHeader {
     name: string;
@@ -26,7 +25,7 @@ export abstract class MappedInterceptor {
 
     protected excludeHeaders: HttpHeader[];
 
-    protected pathMatcher: PathMatcher = new SimplePathMatcher();
+    protected pathMatcher: PathMatcher = new AntPathMatcher();
 
 
     constructor(includePatterns: string[],

@@ -1,4 +1,4 @@
-import NetInfo, {NetInfoStateType} from "@react-native-community/netinfo";
+import NetInfo, {NetInfoState, NetInfoStateType} from "@react-native-community/netinfo";
 import {NetworkStatus, NetworkStatusListener, NetworkType} from "wind-http";
 
 /**
@@ -6,31 +6,39 @@ import {NetworkStatus, NetworkStatusListener, NetworkType} from "wind-http";
  */
 export default class ReactNativeNetworkStatusListener implements NetworkStatusListener {
 
-    getNetworkStatus = (): Promise<NetworkStatus> => {
+    private readonly prevStatus: Record<'value', NetworkStatus>;
 
-        return NetInfo.fetch().then((networkState) => {
-            const networkStats = this.processNetworkStats(networkState);
-            if (networkStats == null) {
-                return Promise.reject(networkStats);
-            } else {
-                return Promise.resolve(networkStats);
-            }
-        });
+    constructor() {
+        this.prevStatus = {
+            value: null
+        };
+    }
+
+    getNetworkStatus = async (): Promise<NetworkStatus> => {
+        const networkState = await NetInfo.fetch();
+        const networkStats = this.processNetworkStats(networkState);
+        if (networkStats == null) {
+            return Promise.reject(networkStats);
+        } else {
+            return Promise.resolve(networkStats);
+        }
     };
 
-    onChange = (callback: (networkStatus: NetworkStatus) => void) => {
+    onChange = (callback: (networkStatus: NetworkStatus, prevStatus?: NetworkStatus) => void) => {
         // {"details":{"carrier":"中国移动","cellularGeneration":"4g","isConnectionExpensive":true},"isConnected":true,"isInternetReachable":true,"type":"cellular"}
         NetInfo.addEventListener(state => {
-            callback(this.processNetworkStats(state));
+            const status = this.processNetworkStats(state);
+            callback(status, this.prevStatus.value);
+            this.prevStatus.value = status;
         });
     };
 
-    private processNetworkStats = (networkState): NetworkStatus => {
-        const {type, isConnected, details} = networkState;
+    private processNetworkStats = (networkState: NetInfoState): NetworkStatus => {
+        const {type, details} = networkState;
         if (type == null || details == null) {
             return null
         }
-        let networkType;
+        let networkType: NetworkType;
         const {cellularGeneration, isConnectionExpensive} = details as any;
         if (isConnectionExpensive) {
             // 需要付费的网络，例如 移动4G 等
@@ -46,8 +54,9 @@ export default class ReactNativeNetworkStatusListener implements NetworkStatusLi
         }
 
         return {
-            networkType,
-            isConnected: networkType !== NetworkType.NONE
+            // @ts-ignore
+            isConnected: networkType !== NetworkType.NONE,
+            networkType
         }
     };
 

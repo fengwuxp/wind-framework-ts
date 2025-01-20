@@ -23,7 +23,7 @@ export default class HttpResponseEventPublisherInterceptor<T extends HttpRequest
     intercept = (request: T, context: HttpRequestContextAttributes, next: ClientHttpRequestExecution<T>): Promise<any> => {
         return next(request, context).then((response: any) => {
             this.publisher.publishEvent(request, response);
-            return Promise.reject(response)
+            return Promise.resolve(response)
         });
     }
 

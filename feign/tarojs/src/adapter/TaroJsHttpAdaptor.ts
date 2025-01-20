@@ -1,7 +1,7 @@
-import {HttpAdapter, HttpMethod, HttpRequestContextAttributes, HttpResponse} from "wind-http";
-import {TarojsHttpRequest} from "./TarojsHttpRequest";
+import {HttpAdapter, HttpMethod, HttpResponse} from "wind-http";
+import {TaroJsHttpRequest} from "./TaroJsHttpRequest";
 
-type TarojsHttpResponse = {
+type TaroJsHttpResponse = {
     /** 开发者服务器返回的数据 */
     data: any
     /** 开发者服务器返回的 HTTP Response Header */
@@ -14,7 +14,7 @@ type TarojsHttpResponse = {
     cookies?: string[]
 };
 
-type TarojsHttpRequestOptions = {
+type TaroJsHttpRequestOptions = {
     /** 开发者服务器接口地址 */
     url: string
     /** 请求的参数 */
@@ -153,39 +153,38 @@ type TarojsHttpRequestOptions = {
     storeCheck?(): boolean
 };
 
-export type TarojsHttpRequester = (request: TarojsHttpRequestOptions) => Promise<TarojsHttpResponse>;
+export type TaroJsHttpRequester = (request: TaroJsHttpRequestOptions) => Promise<TaroJsHttpResponse>;
 
 /**
- * tarojs http adaptor
+ * taro js http adaptor
  */
-export default class TarojsHttpAdaptor implements HttpAdapter<TarojsHttpRequest> {
+export default class TaroJsHttpAdaptor implements HttpAdapter<TaroJsHttpRequest> {
 
-    private readonly tarojsHttpFetch: TarojsHttpRequester;
+    private readonly taroJsHttpFetch: TaroJsHttpRequester;
 
     private readonly timeout: number;
 
     /**
-     * @param tarojsHttpFetch tarojs request function
+     * @param taroJsHttpFetch taro js request function
      * @param timeout  default 30000ms
      */
-    constructor(tarojsHttpFetch: TarojsHttpRequester, timeout?: number) {
-        this.tarojsHttpFetch = tarojsHttpFetch;
+    constructor(taroJsHttpFetch: TaroJsHttpRequester, timeout?: number) {
+        this.taroJsHttpFetch = taroJsHttpFetch;
         this.timeout = timeout || 30 * 1000;
     }
 
-    send = (req: TarojsHttpRequest, context: HttpRequestContextAttributes): Promise<HttpResponse> => {
-        return this.tarojsHttpFetch(this.buildRequest(req)).then((resp) => {
-            const ok = resp.statusCode >= 200 && resp.statusCode < 300;
-            return {
-                data: resp.data,
-                headers: resp.header,
-                ok,
-                statusCode: resp.statusCode
-            }
-        });
+    send = async (req: TaroJsHttpRequest): Promise<HttpResponse> => {
+        const resp = await this.taroJsHttpFetch(this.buildRequest(req));
+        const ok = resp.statusCode >= 200 && resp.statusCode < 300;
+        return {
+            data: resp.data,
+            headers: resp.header,
+            ok,
+            statusCode: resp.statusCode
+        };
     };
 
-    private buildRequest = (options: TarojsHttpRequest): TarojsHttpRequestOptions => {
+    private buildRequest = (options: TaroJsHttpRequest): TaroJsHttpRequestOptions => {
         const {
             url,
             body,
