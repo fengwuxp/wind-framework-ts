@@ -1,11 +1,5 @@
-import {ApiSigner, HMAC_SHA256,SHA256_WITH_RSA} from './ApiSignatureAlgorithm';
-import {
-    ApiSignatureRequest,
-    getCanonicalizedQueryString,
-    getSignTextForDigest,
-    getSignTextForSha256WithRsa
-} from "./ApiSignatureRequest";
-import StringUtils from "wind-common-utils/lib/string/StringUtils";
+import {ApiSigner, HMAC_SHA256, SHA256_WITH_RSA} from './ApiSignatureAlgorithm';
+import {ApiSignatureRequest, genNonce, getCanonicalizedQueryString, getSignTextForDigest, getSignTextForSha256WithRsa} from "./ApiSignatureRequest";
 
 
 /**
@@ -80,23 +74,6 @@ const getSignHeaderName = (name: string, headerPrefix?: string) => {
 }
 
 
-export interface ApiRequestSignResult {
-
-    /**
-     * 签名的请求头
-     */
-    headers: Record<string, string>;
-
-    /**
-     * 仅在 debug 模式下返回
-     */
-    debugObject?: {
-        request: ApiSignatureRequest,
-        signatureText: string;
-        queryString: string;
-    }
-}
-
 export class ApiRequestSinger {
 
     private readonly secretAccount: ApiSecretAccount;
@@ -104,7 +81,6 @@ export class ApiRequestSinger {
     private readonly apiSigner: ApiSigner;
 
     private readonly options: ApiRequestSingerOptions;
-
 
     constructor(secretAccount: ApiSecretAccount, apiSigner: ApiSigner, options: ApiRequestSingerOptions) {
         this.secretAccount = secretAccount;
@@ -125,30 +101,28 @@ export class ApiRequestSinger {
      * @param request
      * @return 签名请求头对象
      */
-    sign = (request: Omit<ApiSignatureRequest, "nonce" | "timestamp">): ApiRequestSignResult => {
+    sign = (request: (Omit<ApiSignatureRequest, "nonce" | "timestamp"> & { nonce?: string; timestamp?: string; })): Record<string, string> => {
         const {secretAccount, apiSigner, options} = this;
         const signRequest: ApiSignatureRequest = {
-            ...request,
-            method: request.method.toUpperCase() as any,
-            nonce: StringUtils.genNonce(),
             timestamp: new Date().getTime().toString(),
+            nonce: genNonce(),
+            ...request,
+            method: request.method.toUpperCase() as any
         }
         const headerPrefix = options.headerPrefix;
-        const signHeaders = {
+        const result = {
             [getSignHeaderName(SIGN_HEADER_NAME, headerPrefix)]: apiSigner.sign(signRequest, secretAccount.secretKey),
             [getSignHeaderName(NONCE_HEADER_NAME, headerPrefix)]: signRequest.nonce,
             [getSignHeaderName(TIMESTAMP_HEADER_NAME, headerPrefix)]: signRequest.timestamp,
             [getSignHeaderName(ACCESS_KEY_HEADER_NAME, headerPrefix)]: secretAccount.accessId
         };
         if (secretAccount.secretVersion) {
-            signHeaders[getSignHeaderName(SECRET_VERSION_HEADER_NAME, headerPrefix)] = secretAccount.secretVersion;
-        }
-        const result: ApiRequestSignResult = {
-            headers: signHeaders
+            result[getSignHeaderName(SECRET_VERSION_HEADER_NAME, headerPrefix)] = secretAccount.secretVersion
         }
         if (options.debug) {
             // debug 模式支持
-            result.debugObject = {
+            // @ts-ignore
+            result['DebugHeaders'] = {
                 request: signRequest,
                 // TODO 待优化
                 signatureText: apiSigner === HMAC_SHA256 ? getSignTextForDigest(signRequest) : getSignTextForSha256WithRsa(signRequest),

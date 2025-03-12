@@ -1,6 +1,6 @@
 {
   "name": "wind-http",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "typescript http client",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
@@ -47,7 +47,7 @@
     "@howiefh/ant-path-matcher": "^0.0.4",
     "lodash": "^4.17.15",
     "url-parse": "^1.5.10",
-    "wind-api-signature": "^1.0.0",
+    "wind-api-signature": "^1.0.9",
     "wind-common-utils": "^1.0.0"
   }
 }

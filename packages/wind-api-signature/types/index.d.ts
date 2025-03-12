@@ -1,3 +1,20 @@
+/**
+ * http media type
+ */
+declare enum HttpMediaType {
+    /**
+     * 表单
+     */
+    FORM = "application/x-www-form-urlencoded",
+    /**
+     * json
+     */
+    APPLICATION_JSON = "application/json",
+    /**
+     * JSON_UTF_8
+     */
+    APPLICATION_JSON_UTF8 = "application/json;charset=UTF-8"
+}
 interface ApiSignatureRequest {
     /**
      * http 请求方法
@@ -24,6 +41,11 @@ interface ApiSignatureRequest {
      */
     requestBody?: string;
 }
+/**
+ *  生成随机字符串
+ */
+declare const genNonce: () => string;
+declare const matchMediaType: (contentType: HttpMediaType | string, expectMediaType: HttpMediaType | string) => boolean;
 
 interface ApiSigner {
     /**
@@ -70,20 +92,6 @@ interface ApiRequestSingerOptions {
      */
     debug?: boolean;
 }
-interface ApiRequestSignResult {
-    /**
-     * 签名的请求头
-     */
-    headers: Record<string, string>;
-    /**
-     * 仅在 debug 模式下返回
-     */
-    debugObject?: {
-        request: ApiSignatureRequest;
-        signatureText: string;
-        queryString: string;
-    };
-}
 declare class ApiRequestSinger {
     private readonly secretAccount;
     private readonly apiSigner;
@@ -96,7 +104,10 @@ declare class ApiRequestSinger {
      * @param request
      * @return 签名请求头对象
      */
-    sign: (request: Omit<ApiSignatureRequest, "nonce" | "timestamp">) => ApiRequestSignResult;
+    sign: (request: (Omit<ApiSignatureRequest, "nonce" | "timestamp"> & {
+        nonce?: string;
+        timestamp?: string;
+    })) => Record<string, string>;
 }
 
-export { type ApiRequestSignResult, ApiRequestSinger, type ApiRequestSingerOptions, type ApiSecretAccount, type ApiSignatureRequest, type ApiSigner };
+export { ApiRequestSinger, type ApiRequestSingerOptions, type ApiSecretAccount, type ApiSignatureRequest, HttpMediaType, genNonce, matchMediaType };

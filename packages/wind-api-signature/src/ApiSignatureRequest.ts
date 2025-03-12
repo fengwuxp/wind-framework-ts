@@ -1,5 +1,28 @@
 import md5 from 'md5';
 
+/**
+ * http media type
+ */
+export enum HttpMediaType {
+
+    /**
+     * 表单
+     */
+    FORM = "application/x-www-form-urlencoded",
+
+    /**
+     * json
+     */
+    APPLICATION_JSON = "application/json",
+
+    /**
+     * JSON_UTF_8
+     */
+    APPLICATION_JSON_UTF8 = "application/json;charset=UTF-8",
+
+}
+
+
 export interface ApiSignatureRequest {
 
     /**
@@ -35,6 +58,18 @@ export interface ApiSignatureRequest {
 
 
 /**
+ *  生成随机字符串
+ */
+export const genNonce = (): string => {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+        // @ts-ignore
+        return (c === 'x' ? (Math.random() * 16) | 0 : 'r&0x3' | '0x8').toString(16);
+        // @ts-ignore
+    }).replaceAll('-', '');
+};
+
+
+/**
  * 获取标准化查询字符串 ，key 按照字典序排序
  * @param queryParams
  */
@@ -44,7 +79,7 @@ export const getCanonicalizedQueryString = (queryParams?: Record<string, any>) =
 
     }
     const hasText = (val) => {
-        return isNoneNullObject(val) && typeof val === "string" && val.trim().length > 0;
+        return isNoneNullObject(val) && typeof val === "string" && val.trim().length > 0 ;
     }
     const joiner = (key, val) => {
         return isNoneNullObject(val) ? `${key}=${val}` : null;
@@ -96,3 +131,17 @@ export const getSignTextForSha256WithRsa = (request: ApiSignatureRequest) => {
         `${getCanonicalizedQueryString(request.queryParams) ?? ''}\n` +
         `${request.requestBody ?? ''}\n`;
 }
+
+
+export const matchMediaType = (contentType: HttpMediaType | string, expectMediaType: HttpMediaType | string) => {
+    if (contentType == null || expectMediaType == null) {
+        return false;
+    }
+
+    if (contentType === expectMediaType) {
+        return true;
+    }
+    const [t1] = contentType.split(";");
+    const [t2] = expectMediaType.split(";");
+    return t1 == t2;
+};

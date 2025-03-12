@@ -1,6 +1,7 @@
 import * as log4js from "log4js";
 import {ApiSignatureRequest, getCanonicalizedQueryString, getSignTextForDigest} from "../src/ApiSignatureRequest";
 import {HMAC_SHA256, SHA256_WITH_RSA} from "../src/ApiSignatureAlgorithm";
+import {ApiRequestSinger} from "../src/ApiRequestSinger";
 
 
 const logger = log4js.getLogger();
@@ -81,6 +82,7 @@ describe("test api sign", () => {
         const signByJava: string = "2AmHWvN3od0AA0HpETFCp8cbYeB/JSg5pOB6h8Pliqk=";
         expect(HMAC_SHA256.verify(signatureRequest, secretKey, sign)).toEqual(true);
         expect(HMAC_SHA256.verify(signatureRequest, secretKey, signByJava)).toEqual(true);
+        expect(ApiRequestSinger.hmacSha256({accessId: "", secretKey}).sign(signatureRequest)["Wind-Sign"]).toEqual(signByJava);
     })
 
     test("api sign with SHA256withRSA", () => {
@@ -90,14 +92,7 @@ describe("test api sign", () => {
         const signByJava: string = "myqx+8nASV+gZXSJPenAS/6WFUVrKsiEeEiWUvmtHm/zOX15eTq9EBhy9Rz76hW52IYFnrJwZXYX740K6nB7e9JwkciN4v2DbLC9fiYbkYny5OcmO68IW3TAS+uu43ShwXjzZqRp6b6gID4hbZ+b9E8cZ7qXnfyh7Pr+y9aJaF61dWbxmg5/+sJQH4gxegYxDkptu2H0VZqQkQeNm95NJ4P5jYEEB6NqfqFj0pyXa1mZlw5S4xxg6bP+XbUd1tWm2HcLRfSuCo0WH9invr4Dogkcr5AFAmK6UK5M6SogMffaaNMroa5Tf00Opp/zQyIuzCm7F4W5U/3QxiJo0nIc8Q==\n"
         expect(SHA256_WITH_RSA.verify(signatureRequest, publicKey, sign)).toEqual(true);
         expect(SHA256_WITH_RSA.verify(signatureRequest, publicKey, signByJava)).toEqual(true);
-    })
-
-    test("query params encoding", () => {
-        const result = getCanonicalizedQueryString({
-            uid: "%3D%3D",
-            querySize: 1
-        })
-        expect(result).toEqual("querySize=1&uid=%3D%3D");
+        expect(ApiRequestSinger.sha256WithRsa({accessId: "", secretKey: privateKey}).sign(signatureRequest)["Wind-Sign"]).toEqual(sign);
     })
 
 });

@@ -1,9 +1,9 @@
-module.exports = {
+export default {
     transform: {
         '^.+\\.ts[x]?$': 'ts-jest',
     },
-    testMatch: ["**/?(*.)+(spec|test).[jt]s?(x)"],
-    testPathIgnorePatterns: ["/lib/", "/es/", "/exnext/"],
+    testRegex: '(/test/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?|ts?)$',
+    testPathIgnorePatterns: ["/lib/", /*"/node_modules/"*/],
     transformIgnorePatterns: [],
     moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
     collectCoverage: false,
