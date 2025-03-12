@@ -49,17 +49,17 @@ export default class ApiSignatureRequestInterceptor<T extends HttpRequest> imple
     intercept = (request: T, context: any, next: any): Promise<any> => {
         const contentType = (request.headers || {})[CONTENT_TYPE_HEAD_NAME];
         const url = new URL(request.url);
-        const result = this.signer.sign({
+        const signatureHeaders = this.signer.sign({
             method: request.method as any,
             requestPath: url.pathname,
             requestBody: serializeSignRequestBody(request.body, contentType),
             queryParams: qs.parse(url.query.substring(1))
         });
-        if (result['DebugHeaders']) {
-            ApiSignatureRequestInterceptor.LOG.debug("api sign debug", result['DebugHeaders']);
-            delete result['DebugHeaders'];
+        if (signatureHeaders['DebugHeaders']) {
+            ApiSignatureRequestInterceptor.LOG.debug("api sign debug", signatureHeaders['DebugHeaders']);
+            delete signatureHeaders['DebugHeaders'];
         }
-        request.headers = {...(request.headers || {}), ...result};
+        request.headers = {...(request.headers || {}), ...signatureHeaders};
         return next(request, context);
     }
 }
