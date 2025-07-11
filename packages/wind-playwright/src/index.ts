@@ -18,4 +18,4 @@ export {
 export {PlaywrightHttpResponse, default as HttpMonitor} from "./http/HttpMonitor";
 export {getWithoutQueryStringUri, NativeReadyOnlyHttpRequest, NativeReadyOnlyHttpResponse} from "./http/HttpObject";
 
-export {BrowserNetworkMonitor, MonitorHandle} from "./network/BrowserNetworkMonitor";
+export {BrowserHttpMonitor, MonitorHandle} from "./network/BrowserHttpMonitor";

@@ -28,7 +28,7 @@ export interface ReadyOnlyHttpHeaders {
 export type ReadOnlyQueryParams = Record<string, string | string[]>;
 
 
-export interface ReadyOnlyHttpRequest {
+export interface ReadyOnlyHttpRequest<T = any> {
 
     /**
      * 包含查询参数
@@ -46,10 +46,10 @@ export interface ReadyOnlyHttpRequest {
 
     readonly headers: ReadyOnlyHttpHeaders;
 
-    readonly body?: any;
+    readonly body?: T;
 }
 
-export interface ReadyOnlyHttpResponse<T=any> {
+export interface ReadyOnlyHttpResponse<T = any> {
 
     readonly ok: boolean;
 

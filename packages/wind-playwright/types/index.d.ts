@@ -1,6 +1,6 @@
 import { HttpMethod } from 'wind-http';
-import EventEmitter from 'eventemitter3';
-import { Page, Request, Response } from 'playwright';
+import { Page as Page$1, Request, Response } from 'playwright';
+import { Page } from 'playwright-core';
 
 declare enum HttpScheme {
     http = "http://",
@@ -20,7 +20,7 @@ interface ReadyOnlyHttpHeaders {
  * query params type
  */
 type ReadOnlyQueryParams = Record<string, string | string[]>;
-interface ReadyOnlyHttpRequest {
+interface ReadyOnlyHttpRequest<T = any> {
     /**
      * 包含查询参数
      */
@@ -32,7 +32,7 @@ interface ReadyOnlyHttpRequest {
     readonly queryParams: ReadOnlyQueryParams;
     readonly method: HttpMethod;
     readonly headers: ReadyOnlyHttpHeaders;
-    readonly body?: any;
+    readonly body?: T;
 }
 interface ReadyOnlyHttpResponse<T = any> {
     readonly ok: boolean;
@@ -174,63 +174,59 @@ declare class ResponseMatcherFactory {
     private static build;
 }
 
-interface BrowserNetworkMonitor {
-    start: () => Promise<void>;
-    destroy: () => Promise<void>;
-}
-type MonitorHandle<T> = (data: T) => void;
-
-type HttpReadOnlyEvent = {
-    request: ReadyOnlyHttpRequest;
-    response: ReadyOnlyHttpResponse;
+type HttpReadOnlyEvent<REQ = any, RESP = any> = {
+    request: ReadyOnlyHttpRequest<REQ>;
+    response: ReadyOnlyHttpResponse<RESP>;
 };
-type PlaywrightHttpResponse<T> = Promise<ReadyOnlyHttpResponse<T>>;
-type MatcherManager = {
-    add: (matcher: RequestMatcher) => void;
-    remove: (matcher: RequestMatcher) => void;
-};
-declare class HttpEventListenerBuilder {
-    private left;
-    private ops;
-    private readonly requestPattern;
-    private readonly emitter;
-    private readonly matcherManager;
-    constructor(requestPattern: string, emitter: EventEmitter, matcherManager: MatcherManager);
+interface HttpEventListenerBuilder {
     referer: (refer: string) => HttpEventListenerBuilder;
     headers: (headers: Record<string, HeaderValueMatchType>) => HttpEventListenerBuilder;
     queryPrams: (queryParams: QueryParamMathType) => HttpEventListenerBuilder;
     or: () => HttpEventListenerBuilder;
-    private combineRequestMatcher;
-    once: (func: (event: HttpReadOnlyEvent) => void) => () => void;
-    on: (func: (event: HttpReadOnlyEvent) => void) => () => void;
-    private listen;
+    once: (func: (event: HttpReadOnlyEvent) => void) => void;
+    on: (func: (event: HttpReadOnlyEvent) => void) => void;
 }
+/**
+ * 浏览器网络 http 请求监听
+ */
+interface BrowserHttpMonitor {
+    start: () => Promise<void>;
+    dispose: () => Promise<void>;
+    waitForSuccess: <REQ = any, RESP = any>(requestPattern: string, before?: (page: Page) => Promise<void>) => Promise<HttpReadOnlyEvent<REQ, RESP>>;
+    waitForResponse: <T>(requestPattern: string, before?: (page: Page) => Promise<void>) => Promise<ReadyOnlyHttpResponse<T>>;
+    /**
+     * Monitor matching HTTP requests by pattern (e.g. URL or method).
+     * @param requestPattern - Ant-style pattern or substring to match request URLs，example GET /api/v1/** or /api/v1/users/1
+     */
+    onRequest: (requestPattern: string) => HttpEventListenerBuilder;
+}
+type MonitorHandle<T> = (data: T) => void;
+
+type PlaywrightHttpResponse<T> = Promise<ReadyOnlyHttpResponse<T>>;
 /**
  * http 请求监听器
  */
-declare class HttpMonitor implements BrowserNetworkMonitor {
-    readonly page: Page;
+declare class HttpMonitor implements BrowserHttpMonitor {
+    readonly page: Page$1;
     private readonly httpMatcherHolder;
     private readonly emitter;
     private readonly requestMatchers;
     private constructor();
-    static of: (page: Page) => HttpMonitor;
+    static readonly of: (page: Page$1) => HttpMonitor;
     start: () => Promise<void>;
-    destroy: () => Promise<void>;
+    dispose: () => Promise<void>;
     /**
      * 等待接口 2xx 响应
-     * @param url
-     * @param method
+     * @param requestPattern
      * @param before
      */
-    wait2xx: (url: string, method: HttpMethod, before?: (page: Page) => Promise<void>) => Promise<HttpReadOnlyEvent>;
+    waitForSuccess: <REQ = any, RESP = any>(requestPattern: string, before?: (page: Page$1) => Promise<void>) => Promise<HttpReadOnlyEvent<REQ, RESP>>;
     /**
      * 等待接口 2xx 响应
-     * @param url
-     * @param method
+     * @param requestPattern
      * @param before
      */
-    wait2xxResponse: <T>(url: string, method: HttpMethod, before?: (page: Page) => Promise<void>) => Promise<ReadyOnlyHttpResponse<T>>;
+    waitForResponse: <T>(requestPattern: string, before?: (page: Page$1) => Promise<void>) => Promise<ReadyOnlyHttpResponse<T>>;
     /**
      * const destroyFn= on("")
      * .referer()
@@ -242,10 +238,9 @@ declare class HttpMonitor implements BrowserNetworkMonitor {
      *
      * })
      * destroyFn()
-     * @param url
-     * @param method
+     * @param requestPattern {httpMethod} {url}，例如: GET  /api/v1 或 /ap1/v1/**
      */
-    request: (url: string, method?: HttpMethod) => HttpEventListenerBuilder;
+    onRequest: (requestPattern: string) => HttpEventListenerBuilder;
     /**
      * @param requestPattern
      */
@@ -272,4 +267,4 @@ declare class NativeReadyOnlyHttpResponse implements ReadyOnlyHttpResponse {
     setBody: (body: any) => void;
 }
 
-export { AntRequestMatcher, AnyTextMatcher, type BrowserNetworkMonitor, type HeaderValueMatchType, HttpHeaderNames, HttpHeadersMatcher, type HttpMatcher, HttpMatcherFactory, HttpMatchesOps, HttpMonitor, HttpScheme, type HttpStatusRangeMatchType, type MonitorHandle, NativeReadyOnlyHttpRequest, NativeReadyOnlyHttpResponse, type PlaywrightHttpResponse, type QueryParamMathType, type ReadOnlyQueryParams, type ReadyOnlyHttpHeaders, type ReadyOnlyHttpRequest, type ReadyOnlyHttpResponse, type RequestMatcher, RequestMatcherFactory, type ResponseMatcher, ResponseMatcherFactory, getWithoutQueryStringUri, wrapperReadyOnlyHeaders };
+export { AntRequestMatcher, AnyTextMatcher, type BrowserHttpMonitor, type HeaderValueMatchType, HttpHeaderNames, HttpHeadersMatcher, type HttpMatcher, HttpMatcherFactory, HttpMatchesOps, HttpMonitor, HttpScheme, type HttpStatusRangeMatchType, type MonitorHandle, NativeReadyOnlyHttpRequest, NativeReadyOnlyHttpResponse, type PlaywrightHttpResponse, type QueryParamMathType, type ReadOnlyQueryParams, type ReadyOnlyHttpHeaders, type ReadyOnlyHttpRequest, type ReadyOnlyHttpResponse, type RequestMatcher, RequestMatcherFactory, type ResponseMatcher, ResponseMatcherFactory, getWithoutQueryStringUri, wrapperReadyOnlyHeaders };

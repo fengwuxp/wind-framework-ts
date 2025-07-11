@@ -2,16 +2,12 @@ import {HttpHeaderNames, ReadyOnlyHttpRequest, ReadyOnlyHttpResponse} from "./Ht
 import {AntRequestMatcher, QueryParamMathType, RequestMatcher, RequestMatcherFactory} from "./match/RequestMatcher";
 import {HeaderValueMatchType, HttpMatcherFactory, HttpMatchesOps} from "./match/HttpMatcher";
 import EventEmitter from "eventemitter3"
-import {HttpMethod, responseIsJson, responseIsText} from "wind-http";
+import {responseIsJson, responseIsText} from "wind-http";
 import {Page, Response} from "playwright";
 import {ResponseMatcherFactory} from "./match/ResponseMatcher";
 import {NativeReadyOnlyHttpRequest, NativeReadyOnlyHttpResponse} from "./HttpObject";
-import {BrowserNetworkMonitor} from "../network/BrowserNetworkMonitor";
+import {BrowserHttpMonitor, HttpEventListenerBuilder, HttpReadOnlyEvent} from "../network/BrowserHttpMonitor";
 
-type HttpReadOnlyEvent = {
-    request: ReadyOnlyHttpRequest;
-    response: ReadyOnlyHttpResponse;
-}
 
 export type PlaywrightHttpResponse<T> = Promise<ReadyOnlyHttpResponse<T>>
 
@@ -20,7 +16,7 @@ type MatcherManager = {
     remove: (matcher: RequestMatcher) => void;
 }
 
-class HttpEventListenerBuilder {
+class _HttpEventListenerBuilder implements HttpEventListenerBuilder {
 
     private left: RequestMatcher;
 
@@ -59,11 +55,6 @@ class HttpEventListenerBuilder {
         return this;
     }
 
-    private combineRequestMatcher = (right: RequestMatcher) => {
-        this.left = HttpMatcherFactory.ops([this.left, right], this.ops);
-        this.ops = HttpMatchesOps.AND;
-    }
-
     public once = (func: (event: HttpReadOnlyEvent) => void) => {
         return this.listen("once", func);
     }
@@ -72,7 +63,12 @@ class HttpEventListenerBuilder {
         return this.listen("on", func);
     }
 
-    private listen = (method: "once" | "on", func: (event: HttpReadOnlyEvent) => void) => {
+    private readonly combineRequestMatcher = (right: RequestMatcher) => {
+        this.left = HttpMatcherFactory.ops([this.left, right], this.ops);
+        this.ops = HttpMatchesOps.AND;
+    }
+
+    private readonly listen = (method: "once" | "on", func: (event: HttpReadOnlyEvent) => void) => {
         const {emitter, requestPattern, matcherManager, left} = this;
         matcherManager.add(left);
         if (method === "once") {
@@ -94,7 +90,7 @@ class HttpEventListenerBuilder {
 /**
  * http 请求监听器
  */
-export default class HttpMonitor implements BrowserNetworkMonitor {
+export default class HttpMonitor implements BrowserHttpMonitor {
 
     readonly page: Page;
 
@@ -109,7 +105,7 @@ export default class HttpMonitor implements BrowserNetworkMonitor {
         this.httpMatcherHolder = new HttpMatcherHolder(this.emitter);
     }
 
-    public static of = (page: Page) => {
+    public static readonly of = (page: Page) => {
         return new HttpMonitor(page)
     }
 
@@ -125,7 +121,7 @@ export default class HttpMonitor implements BrowserNetworkMonitor {
         });
     }
 
-    destroy = async (): Promise<void> => {
+    dispose = async (): Promise<void> => {
         const {page, emitter} = this;
         await page.unroute("**");
         emitter.removeAllListeners();
@@ -134,13 +130,12 @@ export default class HttpMonitor implements BrowserNetworkMonitor {
 
     /**
      * 等待接口 2xx 响应
-     * @param url
-     * @param method
+     * @param requestPattern
      * @param before
      */
-    wait2xx = async (url: string, method: HttpMethod, before?: (page: Page) => Promise<void>): Promise<HttpReadOnlyEvent> => {
+    waitForSuccess = async <REQ = any, RESP = any>(requestPattern: string, before?: (page: Page) => Promise<void>): Promise<HttpReadOnlyEvent<REQ, RESP>> => {
         const result = new Promise<HttpReadOnlyEvent>((resolve, reject) => {
-            this.request(url, method).once((event) => {
+            this.onRequest(requestPattern).once((event) => {
                 if (event.response.ok) {
                     resolve(event)
                 } else {
@@ -156,13 +151,12 @@ export default class HttpMonitor implements BrowserNetworkMonitor {
 
     /**
      * 等待接口 2xx 响应
-     * @param url
-     * @param method
+     * @param requestPattern
      * @param before
      */
-    wait2xxResponse = async <T>(url: string, method: HttpMethod, before?: (page: Page) => Promise<void>): Promise<ReadyOnlyHttpResponse<T>> => {
+    waitForResponse = async <T>(requestPattern: string, before?: (page: Page) => Promise<void>): Promise<ReadyOnlyHttpResponse<T>> => {
         const result = new Promise<ReadyOnlyHttpResponse<T>>((resolve, reject) => {
-            this.request(url, method).once((event) => {
+            this.onRequest(requestPattern).once((event) => {
                 if (event.response.ok) {
                     resolve(event.response)
                 } else {
@@ -176,7 +170,6 @@ export default class HttpMonitor implements BrowserNetworkMonitor {
         return result;
     }
 
-
     /**
      * const destroyFn= on("")
      * .referer()
@@ -188,13 +181,11 @@ export default class HttpMonitor implements BrowserNetworkMonitor {
      *
      * })
      * destroyFn()
-     * @param url
-     * @param method
+     * @param requestPattern {httpMethod} {url}，例如: GET  /api/v1 或 /ap1/v1/**
      */
-    request = (url: string, method?: HttpMethod): HttpEventListenerBuilder => {
+    onRequest = (requestPattern: string): HttpEventListenerBuilder => {
         const {requestMatchers} = this
-        const requestPattern = method == null ? url : `${method} ${url}`;
-        return new HttpEventListenerBuilder(requestPattern, this.emitter, {
+        return new _HttpEventListenerBuilder(requestPattern, this.emitter, {
             add: (matcher) => {
                 const values = requestMatchers[requestPattern] ?? [];
                 values.push(matcher);
@@ -214,6 +205,7 @@ export default class HttpMonitor implements BrowserNetworkMonitor {
         this.emitter.removeAllListeners(requestPattern);
         return this
     }
+
 }
 
 
